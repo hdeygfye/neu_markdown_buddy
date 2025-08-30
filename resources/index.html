@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Buddy - Tutorial Browser</title>
+    
+    <!-- Local CSS libraries -->
+    <link rel="stylesheet" href="/libs/highlight.js/github-dark.min.css">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/libs/font-awesome/minimal.css">
+    
+    <!-- Local JavaScript libraries -->
+    <script src="/libs/marked.min.js"></script>
+    
+    <!-- Highlight.js core with comprehensive language pack -->
+    <script src="/libs/highlight.js/highlight.min.js"></script>
+    <script src="/libs/highlight.js/python.min.js"></script>
+    <script src="/libs/highlight.js/java.min.js"></script>
+    <script src="/libs/highlight.js/php.min.js"></script>
+    <script src="/libs/highlight.js/bash.min.js"></script>
+    <script src="/libs/highlight.js/sql.min.js"></script>
+    <script src="/libs/highlight.js/json.min.js"></script>
+    <script src="/libs/highlight.js/yaml.min.js"></script>
+    <script src="/libs/highlight.js/dockerfile.min.js"></script>
+    <script src="/libs/highlight.js/go.min.js"></script>
+    <script src="/libs/highlight.js/rust.min.js"></script>
+    <script src="/libs/highlight.js/swift.min.js"></script>
+    <script src="/libs/highlight.js/kotlin.min.js"></script>
+</head>
+<body>
+    <button class="mobile-menu-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar" id="sidebar">
+            <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Navigation Width">
+                <i class="fas fa-arrows-alt-h"></i>
+            </button>
+            <div class="sidebar-header">
+                <h2><i class="fas fa-book"></i> Markdown Buddy</h2>
+                <div class="window-controls">
+                    <label class="toggle-control" title="Keep window on top of all other windows (Cmd/Ctrl+T)">
+                        <input type="checkbox" id="alwaysOnTopToggle">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">Always on Top</span>
+                    </label>
+                </div>
+            </div>
+            <div class="sidebar-content" id="navigation">
+                <!-- Navigation will be loaded dynamically -->
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="main-content" id="main-content">
+            <div class="welcome-content">
+                <h1><i class="fas fa-rocket"></i> Welcome to Markdown Buddy</h1>
+                <p class="subtitle">Your comprehensive markdown tutorial browser powered by NeutralinoJS</p>
+                
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-book-open"></i>
+                        <h3>Interactive Tutorials</h3>
+                        <p>Browse through organized tutorial collections with ease</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <i class="fas fa-code"></i>
+                        <h3>Syntax Highlighting</h3>
+                        <p>Code blocks highlighted for 20+ programming languages</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <i class="fas fa-mobile-alt"></i>
+                        <h3>Responsive Design</h3>
+                        <p>Works seamlessly on desktop and mobile devices</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <i class="fas fa-copy"></i>
+                        <h3>Copy to Clipboard</h3>
+                        <p>One-click copying for all code blocks</p>
+                    </div>
+                </div>
+                
+                <div class="getting-started">
+                    <h2>Getting Started</h2>
+                    <p>Select a tutorial category from the sidebar to begin browsing tutorials. All your markdown files will be automatically parsed and rendered with syntax highlighting.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Neutralino.js client -->
+    <script src="/js/neutralino.js"></script>
+    <!-- Application scripts -->
+    <script src="/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "neu-markdown-buddy",
+  "version": "1.0.0",
+  "description": "A markdown editor and viewer built with NeutralinoJS",
+  "main": "resources/index.html",
+  "scripts": {
+    "dev": "neu run",
+    "build": "neu build",
+    "clean": "neu clean"
+  },
+  "keywords": [
+    "markdown",
+    "editor",
+    "neutralino",
+    "desktop"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@neutralinojs/neu": "^10.0.0"
+  }
+}
