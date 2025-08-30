@@ -99,12 +99,17 @@ bun install -g @neutralinojs/neu
 git clone <repository-url>
 cd neu_markdown_buddy
 
+# First-time setup: Download NeutralinoJS runtime binaries
+neu update
+
 # Run in development mode
 neu run
 
 # Build for production
 neu build
 ```
+
+> **⚠️ Important:** Always run `neu update` first after installing NeutralinoJS CLI to download the required runtime binaries for your platform.
 
 ## 🎮 Navigation & Usage Guide
 
