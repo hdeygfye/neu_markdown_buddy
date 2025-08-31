@@ -11,9 +11,10 @@
 7. [Color Management and Conversion](#7-color-management-and-conversion)
 8. [Text Overlay and Annotations](#8-text-overlay-and-annotations)
 9. [Batch Processing](#9-batch-processing)
-10. [Performance Optimization](#10-performance-optimization)
-11. [Troubleshooting and Common Issues](#11-troubleshooting-and-common-issues)
-12. [Complete Example Projects](#12-complete-example-projects)
+10. [File Type Detection with python-magic](#8-file-type-detection-with-python-magic)
+11. [Performance Optimization](#10-performance-optimization)
+12. [Troubleshooting and Common Issues](#11-troubleshooting-and-common-issues)
+13. [Complete Example Projects](#12-complete-example-projects)
 
 ---
 
@@ -46,6 +47,24 @@ While ImageMagick works natively from the command line, using it through Python 
 - Command-line interface and API access
 - Cross-platform compatibility
 - High-quality image processing algorithms
+
+### What is python-magic?
+
+**Important Note**: `python-magic` is a different library from ImageMagick's Python bindings. While ImageMagick focuses on image manipulation, `python-magic` is used for file type detection and MIME type identification.
+
+**python-magic features:**
+- Detect file types from file content (not just extensions)
+- MIME type identification
+- Works with any file type, not just images
+- Useful for file validation and security
+- Lightweight alternative for file type detection
+
+**When to use python-magic:**
+- File upload validation
+- Content type detection
+- Security checks before processing files
+- Batch file classification
+- Building file management tools
 
 ## 2. Installation and Setup
 
@@ -86,9 +105,38 @@ Wand is a ctypes-based binding for ImageMagick, providing low-level access.
 
 #### Method 2: python-magick
 
-```bash
-pip install python-magick
+**Note**: The `python-magic` library is different from ImageMagick and is used for file type detection. It requires the system `libmagic` library.
 
+```bash
+pip install python-magic
+```
+
+**Important**: Before installing `python-magic`, you need to install the system `libmagic` library:
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt update
+sudo apt install libmagic1 libmagic-dev
+pip install python-magic
+```
+
+**macOS:**
+```bash
+# Using Homebrew
+brew install libmagic
+pip install python-magic
+
+# Alternative using MacPorts
+sudo port install file
+pip install python-magic
+```
+
+**Windows:**
+```bash
+# Install python-magic-bin which includes libmagic
+pip install python-magic-bin
+# OR install manually from https://github.com/pidydx/libmagicwin64
+```
 
 #### Method 3: Using subprocess with command-line tools
 
@@ -102,9 +150,28 @@ import subprocess
 
 Test your installation by running:
 
+**For Wand (ImageMagick binding):**
 ```python
 from wand.image import Image
 print("ImageMagick version:", Image.magick_version)
+```
+
+**For python-magic (file type detection):**
+```python
+import magic
+
+# Test basic functionality
+test_content = b"Hello, World!"
+file_type = magic.from_buffer(test_content)
+print("File type detected:", file_type)
+
+# Test MIME type detection
+mime = magic.Magic(mime=True)
+mime_type = mime.from_buffer(test_content)
+print("MIME type:", mime_type)
+```
+
+If the python-magic test fails with "ImportError: failed to find libmagic", you need to install the system libmagic library as described above.
 
 
 ## 3. Basic Image Operations
@@ -701,6 +768,174 @@ class ConfigurableImageProcessor:
 # processor.process_images()
 
 
+## 8. File Type Detection with python-magic
+
+The `python-magic` library complements ImageMagick workflows by providing reliable file type detection before processing.
+
+### Basic File Type Detection
+
+```python
+import magic
+import os
+
+def detect_file_type(file_path):
+    """Detect file type using python-magic."""
+    try:
+        # Detect file type from file content
+        file_type = magic.from_file(file_path)
+        
+        # Get MIME type
+        mime = magic.Magic(mime=True)
+        mime_type = mime.from_file(file_path)
+        
+        return {
+            'description': file_type,
+            'mime_type': mime_type
+        }
+    except Exception as e:
+        return {'error': str(e)}
+
+# Usage
+file_info = detect_file_type('image.jpg')
+print(f"File type: {file_info['description']}")
+print(f"MIME type: {file_info['mime_type']}")
+```
+
+### Safe Image Processing Pipeline
+
+```python
+import magic
+from wand.image import Image
+import os
+
+class SafeImageProcessor:
+    def __init__(self):
+        self.supported_images = [
+            'image/jpeg', 'image/png', 'image/gif', 
+            'image/bmp', 'image/tiff', 'image/webp'
+        ]
+    
+    def is_safe_image(self, file_path):
+        """Check if file is a safe image type."""
+        try:
+            mime = magic.Magic(mime=True)
+            mime_type = mime.from_file(file_path)
+            return mime_type in self.supported_images
+        except:
+            return False
+    
+    def process_safe_image(self, input_path, output_path, width=800, height=600):
+        """Process image only if it's a safe type."""
+        if not self.is_safe_image(input_path):
+            print(f"Skipping {input_path}: Not a supported image type")
+            return False
+        
+        try:
+            with Image(filename=input_path) as img:
+                img.resize(width, height)
+                img.save(filename=output_path)
+            return True
+        except Exception as e:
+            print(f"Error processing {input_path}: {e}")
+            return False
+
+# Usage
+processor = SafeImageProcessor()
+processor.process_safe_image('input.jpg', 'output.jpg')
+```
+
+### Batch File Classification
+
+```python
+import magic
+import os
+from collections import defaultdict
+
+def classify_files_in_directory(directory_path):
+    """Classify all files in a directory by type."""
+    file_types = defaultdict(list)
+    
+    if not os.path.exists(directory_path):
+        return file_types
+    
+    mime = magic.Magic(mime=True)
+    
+    for filename in os.listdir(directory_path):
+        filepath = os.path.join(directory_path, filename)
+        
+        if os.path.isfile(filepath):
+            try:
+                mime_type = mime.from_file(filepath)
+                file_types[mime_type].append(filename)
+            except Exception as e:
+                file_types['error'].append(f"{filename}: {e}")
+    
+    return dict(file_types)
+
+# Usage
+classification = classify_files_in_directory('./uploads')
+for mime_type, files in classification.items():
+    print(f"\n{mime_type}:")
+    for file in files:
+        print(f"  - {file}")
+```
+
+### Content-Based Security Validation
+
+```python
+import magic
+
+def validate_upload_security(file_path, allowed_types=None):
+    """Validate uploaded file based on actual content, not extension."""
+    
+    if allowed_types is None:
+        allowed_types = [
+            'image/jpeg', 'image/png', 'image/gif',
+            'text/plain', 'application/pdf'
+        ]
+    
+    try:
+        # Check actual file content
+        mime = magic.Magic(mime=True)
+        actual_type = mime.from_file(file_path)
+        
+        # Get file description
+        description = magic.from_file(file_path)
+        
+        validation_result = {
+            'is_safe': actual_type in allowed_types,
+            'detected_type': actual_type,
+            'description': description,
+            'filename': os.path.basename(file_path)
+        }
+        
+        # Additional security checks
+        if 'executable' in description.lower():
+            validation_result['is_safe'] = False
+            validation_result['warning'] = 'Executable file detected'
+        
+        if 'script' in description.lower():
+            validation_result['is_safe'] = False
+            validation_result['warning'] = 'Script file detected'
+        
+        return validation_result
+        
+    except Exception as e:
+        return {
+            'is_safe': False,
+            'error': str(e),
+            'filename': os.path.basename(file_path)
+        }
+
+# Usage
+result = validate_upload_security('suspicious_file.jpg')
+if result['is_safe']:
+    print(f"File {result['filename']} is safe to process")
+    # Proceed with ImageMagick processing
+else:
+    print(f"Security warning for {result['filename']}: {result.get('warning', 'Unknown issue')}")
+```
+
 ## Summary
 
 This comprehensive guide covers:
@@ -711,15 +946,19 @@ This comprehensive guide covers:
 4. **Text and Watermarking**: Adding text overlays to images
 5. **Batch Processing**: Automating operations on multiple images
 6. **Pipelines and Automation**: Creating reusable image processing workflows
+7. **File Type Detection**: Using python-magic for secure file validation
 
-The examples demonstrate how to build robust image processing pipelines using Wand, from simple one-off operations to complex automated systems that can handle large volumes of images with various transformations.
+The examples demonstrate how to build robust image processing pipelines using both Wand and python-magic, from simple one-off operations to complex automated systems that can handle large volumes of images with proper security validation.
 
 Key takeaways:
 
 - Use Wand for high-quality image manipulation in Python
+- Use python-magic for reliable file type detection and security validation
+- Always validate file types before processing for security
 - Implement proper error handling for file operations
 - Structure code into reusable classes and functions
 - Consider batch processing for efficiency
 - Leverage configuration files for flexible workflows
+- Combine ImageMagick processing with content-based file validation
 
-This approach provides a solid foundation for building sophisticated image processing applications with Python and Wand.
+This approach provides a solid foundation for building sophisticated and secure image processing applications with Python, Wand, and python-magic.
