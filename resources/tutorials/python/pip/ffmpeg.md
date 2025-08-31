@@ -38,6 +38,68 @@ pip install moviepy
 pip install opencv-python
 ```
 
+### Dependency Verification
+
+Before using any FFmpeg functionality, it's crucial to verify that all dependencies are properly installed:
+
+```python
+def check_dependencies():
+    """Check if all required dependencies are available."""
+    dependencies = {
+        'ffmpeg_system': False,
+        'ffmpeg_python': False,
+        'pydub': False,
+        'moviepy': False
+    }
+    
+    # Check system FFmpeg
+    try:
+        result = subprocess.run(['ffmpeg', '-version'], 
+                              capture_output=True, text=True, timeout=10)
+        dependencies['ffmpeg_system'] = result.returncode == 0
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        dependencies['ffmpeg_system'] = False
+    
+    # Check Python packages
+    try:
+        import ffmpeg
+        dependencies['ffmpeg_python'] = True
+    except ImportError:
+        dependencies['ffmpeg_python'] = False
+    
+    try:
+        import pydub
+        dependencies['pydub'] = True
+    except ImportError:
+        dependencies['pydub'] = False
+    
+    try:
+        import moviepy
+        dependencies['moviepy'] = True
+    except ImportError:
+        dependencies['moviepy'] = False
+    
+    return dependencies
+
+def print_dependency_status():
+    """Print status of all dependencies."""
+    deps = check_dependencies()
+    print("📋 Dependency Status:")
+    print(f"  FFmpeg (system): {'✅' if deps['ffmpeg_system'] else '❌'}")
+    print(f"  ffmpeg-python:   {'✅' if deps['ffmpeg_python'] else '❌'}")
+    print(f"  PyDub:           {'✅' if deps['pydub'] else '❌'}")
+    print(f"  MoviePy:         {'✅' if deps['moviepy'] else '❌'}")
+    
+    if not all(deps.values()):
+        print("\n⚠️  Some dependencies are missing. Please install them before proceeding.")
+    else:
+        print("\n✅ All dependencies are installed!")
+
+# Run dependency check
+if __name__ == "__main__":
+    print_dependency_status()
+```
+
 ## 1. Using ffmpeg-python
 
 ### Basic Setup and Validation
@@ -113,14 +175,25 @@ def safe_output_path(output_path, overwrite=False):
     ]
     
     for restricted in restricted_paths:
-        if output.is_relative_to(restricted) and len(output.parts) <= len(restricted.parts) + 1:
-            raise ValueError(f"Cannot write to restricted path: {output}")
+        try:
+            if output.is_relative_to(restricted) and len(output.parts) <= len(restricted.parts) + 1:
+                raise ValueError(f"Cannot write to restricted path: {output}")
+        except ValueError as e:
+            # Re-raise our custom ValueError, but catch any other ValueError from is_relative_to
+            if "Cannot write to restricted path" in str(e):
+                raise
+            # For Python < 3.9 compatibility where is_relative_to might not exist
+            continue
     
     if output.exists() and not overwrite:
         raise FileExistsError(f"Output file exists (use overwrite=True): {output}")
     
     # Create parent directories safely
-    output.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        output.parent.mkdir(parents=True, exist_ok=True)
+    except (PermissionError, OSError) as e:
+        raise PermissionError(f"Cannot create output directory: {e}")
+    
     return str(output)
 ```
 
@@ -166,8 +239,18 @@ def convert_video_format(input_path, output_path, format_options=None, overwrite
         return output_path
         
     except ffmpeg.Error as e:
-        error_msg = e.stderr.decode() if e.stderr else "Unknown FFmpeg error"
+        # Handle FFmpeg-specific errors
+        error_msg = "Unknown FFmpeg error"
+        if hasattr(e, 'stderr') and e.stderr:
+            try:
+                error_msg = e.stderr.decode('utf-8')
+            except (AttributeError, UnicodeDecodeError):
+                error_msg = str(e.stderr)
         raise RuntimeError(f"FFmpeg conversion failed: {error_msg}")
+    except FileNotFoundError:
+        raise RuntimeError("FFmpeg not found. Please ensure FFmpeg is installed and in PATH.")
+    except PermissionError as e:
+        raise RuntimeError(f"Permission denied: {str(e)}")
     except Exception as e:
         raise RuntimeError(f"Video conversion error: {str(e)}")
 
@@ -230,8 +313,18 @@ def extract_audio(input_path, output_path, audio_format='mp3', overwrite=False):
         return output_path
         
     except ffmpeg.Error as e:
-        error_msg = e.stderr.decode() if e.stderr else "Unknown FFmpeg error"
+        # Handle FFmpeg-specific errors
+        error_msg = "Unknown FFmpeg error"
+        if hasattr(e, 'stderr') and e.stderr:
+            try:
+                error_msg = e.stderr.decode('utf-8')
+            except (AttributeError, UnicodeDecodeError):
+                error_msg = str(e.stderr)
         raise RuntimeError(f"Audio extraction failed: {error_msg}")
+    except FileNotFoundError:
+        raise RuntimeError("FFmpeg not found. Please ensure FFmpeg is installed and in PATH.")
+    except PermissionError as e:
+        raise RuntimeError(f"Permission denied: {str(e)}")
     except Exception as e:
         raise RuntimeError(f"Audio extraction error: {str(e)}")
 ```
@@ -269,18 +362,43 @@ def get_video_info(input_path):
             }
             
             if stream['codec_type'] == 'video':
+                # Safe FPS calculation from frame rate fraction
+                frame_rate = stream.get('r_frame_rate', '0/1')
+                try:
+                    if '/' in frame_rate:
+                        numerator, denominator = frame_rate.split('/')
+                        fps = float(numerator) / float(denominator) if float(denominator) != 0 else 0
+                    else:
+                        fps = float(frame_rate)
+                except (ValueError, ZeroDivisionError):
+                    fps = 0
+                
+                # Safe duration parsing
+                duration = stream.get('duration', '0')
+                try:
+                    duration_float = float(duration) if duration != 'N/A' else 0
+                except (ValueError, TypeError):
+                    duration_float = 0
+                
                 stream_info.update({
                     'width': stream.get('width', 0),
                     'height': stream.get('height', 0),
-                    'duration': float(stream.get('duration', 0)),
-                    'fps': eval(stream.get('r_frame_rate', '0/1')),
+                    'duration': duration_float,
+                    'fps': fps,
                     'bit_rate': stream.get('bit_rate', 'unknown')
                 })
             elif stream['codec_type'] == 'audio':
+                # Safe duration parsing for audio streams
+                duration = stream.get('duration', '0')
+                try:
+                    duration_float = float(duration) if duration != 'N/A' else 0
+                except (ValueError, TypeError):
+                    duration_float = 0
+                
                 stream_info.update({
                     'sample_rate': stream.get('sample_rate', 'unknown'),
                     'channels': stream.get('channels', 'unknown'),
-                    'duration': float(stream.get('duration', 0)),
+                    'duration': duration_float,
                     'bit_rate': stream.get('bit_rate', 'unknown')
                 })
             
@@ -289,8 +407,18 @@ def get_video_info(input_path):
         return video_info
         
     except ffmpeg.Error as e:
-        error_msg = e.stderr.decode() if e.stderr else "Unknown FFmpeg error"
+        # Handle FFmpeg-specific errors
+        error_msg = "Unknown FFmpeg error"
+        if hasattr(e, 'stderr') and e.stderr:
+            try:
+                error_msg = e.stderr.decode('utf-8')
+            except (AttributeError, UnicodeDecodeError):
+                error_msg = str(e.stderr)
         raise RuntimeError(f"Failed to get video info: {error_msg}")
+    except FileNotFoundError:
+        raise RuntimeError("FFmpeg not found. Please ensure FFmpeg is installed and in PATH.")
+    except PermissionError as e:
+        raise RuntimeError(f"Permission denied: {str(e)}")
     except Exception as e:
         raise RuntimeError(f"Video info error: {str(e)}")
 
@@ -300,11 +428,29 @@ def print_video_info(file_path):
     try:
         info = get_video_info(file_path)
         print(f"\n📹 Video Information: {info['filename']}")
-        print(f"Format: {info['format']['format_name']}")
-        print(f"Duration: {float(info['format']['duration']):.2f} seconds")
-        print(f"Size: {int(info['format']['size']) / 1024 / 1024:.2f} MB")
         
-        for stream in info['streams']:
+        # Safe format info access
+        format_info = info.get('format', {})
+        print(f"Format: {format_info.get('format_name', 'unknown')}")
+        
+        # Safe duration parsing
+        duration = format_info.get('duration', '0')
+        try:
+            duration_seconds = float(duration)
+            print(f"Duration: {duration_seconds:.2f} seconds")
+        except (ValueError, TypeError):
+            print(f"Duration: {duration}")
+        
+        # Safe size parsing
+        size = format_info.get('size', '0')
+        try:
+            size_bytes = int(size)
+            size_mb = size_bytes / 1024 / 1024
+            print(f"Size: {size_mb:.2f} MB")
+        except (ValueError, TypeError):
+            print(f"Size: {size}")
+        
+        for stream in info.get('streams', []):
             if stream['codec_type'] == 'video':
                 print(f"\n🎬 Video Stream:")
                 print(f"  Codec: {stream['codec_name']}")
@@ -500,8 +646,8 @@ class SafeVideoEditor:
             # Validate dimensions
             if width <= 0 or height <= 0:
                 raise ValueError("Width and height must be positive")
-            if width > 3840 or height > 2160:  # 4K limit
-                raise ValueError("Dimensions too large (max 4K)")
+            if width > 7680 or height > 4320:  # 8K limit for modern systems
+                raise ValueError("Resolution too high (max 8K)")
             
             resized = clip.resize((width, height))
             
@@ -780,6 +926,187 @@ def main():
     batch_parser.add_argument('input_dir', help='Input directory')
     batch_parser.add_argument('output_dir', help='Output directory')
     batch_parser.add_argument('--extension', default='mp4', help='File extension to process')
+    
+    args = parser.parse_args()
+    
+    if not args.command:
+        parser.print_help()
+        return 1
+    
+    processor = MediaProcessor()
+    
+    try:
+        if args.command == 'convert':
+            success = processor.convert_video(args.input, args.output, 
+                                           overwrite=args.force, 
+                                           validate_output=args.validate)
+        elif args.command == 'extract-audio':
+            success = processor.extract_audio(args.input, args.output, 
+                                           args.format, overwrite=args.force)
+        elif args.command == 'info':
+            success = processor.show_info(args.input)
+        elif args.command == 'batch':
+            success = processor.batch_convert(args)
+        else:
+            print(f"Unknown command: {args.command}")
+            return 1
+        
+        return 0 if success else 1
+        
+    except KeyboardInterrupt:
+        print("\n🛑 Operation cancelled by user")
+        return 1
+    except Exception as e:
+        print(f"💥 Unexpected error: {e}")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+## Troubleshooting Guide
+
+### Common Issues and Solutions
+
+#### 1. FFmpeg Not Found
+**Error:** `FileNotFoundError: [Errno 2] No such file or directory: 'ffmpeg'`
+
+**Solutions:**
+- **macOS:** `brew install ffmpeg`
+- **Ubuntu/Debian:** `sudo apt install ffmpeg`
+- **Windows:** Download from [ffmpeg.org](https://ffmpeg.org/download.html) and add to PATH
+- **Verify installation:** `ffmpeg -version`
+
+#### 2. Permission Denied Errors
+**Error:** `PermissionError: [Errno 13] Permission denied`
+
+**Solutions:**
+```python
+# Check file permissions
+import os
+import stat
+
+def fix_permissions(file_path):
+    """Fix common permission issues."""
+    try:
+        # Make file readable
+        os.chmod(file_path, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+        print(f"✅ Fixed permissions for {file_path}")
+    except PermissionError:
+        print(f"❌ Cannot fix permissions for {file_path} - run as administrator")
+```
+
+#### 3. Codec Not Found
+**Error:** `ffmpeg.Error: Unknown encoder 'libx264'`
+
+**Solutions:**
+- Install FFmpeg with codec support: `brew install ffmpeg --with-fdk-aac --with-x264`
+- Use alternative codecs:
+```python
+# Fallback codec options
+CODEC_FALLBACKS = {
+    'video': ['libx264', 'h264', 'mpeg4'],
+    'audio': ['aac', 'libmp3lame', 'pcm_s16le']
+}
+```
+
+#### 4. Out of Memory Errors
+**Error:** `MemoryError` or system becomes unresponsive
+
+**Solutions:**
+```python
+def process_large_file(input_path, output_path):
+    """Process large files safely."""
+    # Check available memory
+    import psutil
+    available_memory = psutil.virtual_memory().available
+    file_size = Path(input_path).stat().st_size
+    
+    if file_size > available_memory * 0.5:  # Use max 50% of available memory
+        print("⚠️  Large file detected, processing in segments...")
+        # Implement segmented processing
+        return process_in_segments(input_path, output_path)
+    else:
+        return standard_process(input_path, output_path)
+```
+
+#### 5. Unsupported Format
+**Error:** `ffmpeg.Error: Invalid data found when processing input`
+
+**Solutions:**
+```python
+def detect_format(file_path):
+    """Safely detect file format."""
+    try:
+        probe = ffmpeg.probe(file_path)
+        return probe['format']['format_name']
+    except:
+        # Fallback to file extension
+        return Path(file_path).suffix.lower().lstrip('.')
+
+SUPPORTED_INPUT_FORMATS = ['mp4', 'avi', 'mov', 'mkv', 'wmv', 'flv', 'webm']
+SUPPORTED_AUDIO_FORMATS = ['mp3', 'wav', 'aac', 'flac', 'ogg', 'm4a']
+```
+
+### Performance Optimization Tips
+
+1. **Use appropriate CRF values:**
+   - CRF 18-24: High quality (larger files)
+   - CRF 25-30: Good quality (balanced)
+   - CRF 31-40: Lower quality (smaller files)
+
+2. **Choose the right preset:**
+   - `ultrafast`: Fastest encoding, largest files
+   - `fast`, `medium`: Balanced speed/quality
+   - `slower`, `veryslow`: Best quality, slowest
+
+3. **Monitor system resources:**
+```python
+import psutil
+
+def monitor_processing():
+    """Monitor system resources during processing."""
+    cpu_percent = psutil.cpu_percent(interval=1)
+    memory = psutil.virtual_memory()
+    
+    print(f"CPU: {cpu_percent:.1f}%")
+    print(f"Memory: {memory.percent:.1f}% used")
+    
+    if cpu_percent > 90:
+        print("⚠️  High CPU usage - consider reducing concurrent processes")
+    if memory.percent > 85:
+        print("⚠️  High memory usage - consider processing smaller files")
+```
+
+### Best Practices Summary
+
+1. **Always validate inputs** before processing
+2. **Use appropriate error handling** for different exception types
+3. **Implement timeout mechanisms** for long-running operations
+4. **Monitor system resources** during batch processing
+5. **Provide clear feedback** to users about processing status
+6. **Clean up temporary files** after processing
+7. **Test with various file formats** and edge cases
+8. **Use logging** for debugging and monitoring
+9. **Implement graceful degradation** for missing codecs
+10. **Document expected behavior** and limitations
+
+## Conclusion
+
+This tutorial provides a comprehensive foundation for working with FFmpeg in Python. The examples emphasize safety, error handling, and best practices to ensure reliable media processing applications.
+
+Remember to:
+- Test thoroughly with your specific use cases
+- Handle edge cases gracefully
+- Monitor performance and resource usage
+- Keep dependencies updated
+- Provide clear user feedback
+
+For additional resources, consult the official documentation:
+- [FFmpeg Documentation](https://ffmpeg.org/documentation.html)
+- [ffmpeg-python Documentation](https://github.com/kkroening/ffmpeg-python)
+- [PyDub Documentation](https://github.com/jiaaro/pydub)
+- [MoviePy Documentation](https://zulko.github.io/moviepy/)
     
     args = parser.parse_args()
     
