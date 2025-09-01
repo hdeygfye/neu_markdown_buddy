@@ -410,6 +410,17 @@ class MarkdownBuddy {
 
     setupKeyboardNavigation() {
         document.addEventListener('keydown', (event) => {
+            // Copy selected text shortcut (Cmd+C on Mac, Ctrl+C on other platforms)
+            if ((event.metaKey || event.ctrlKey) && event.key === 'c') {
+                const selection = window.getSelection();
+                if (selection && selection.toString().trim()) {
+                    // Let the default copy behavior work for text selection
+                    this.copySelectedText(selection.toString());
+                }
+                // Don't prevent default to allow normal copy behavior
+                return;
+            }
+
             // Always On Top shortcut
             if ((event.metaKey || event.ctrlKey) && event.key === 't') {
                 event.preventDefault();
@@ -530,6 +541,10 @@ class MarkdownBuddy {
                     <div class="help-section">
                         <h3>Application</h3>
                         <div class="help-shortcuts">
+                            <div class="help-shortcut">
+                                <kbd>Ctrl/Cmd</kbd> + <kbd>C</kbd>
+                                <span>Copy selected text</span>
+                            </div>
                             <div class="help-shortcut">
                                 <kbd>Ctrl/Cmd</kbd> + <kbd>T</kbd>
                                 <span>Toggle Always on Top</span>
@@ -921,6 +936,58 @@ class MarkdownBuddy {
         } catch (error) {
             console.warn('Failed to copy path:', error);
             this.showNotification('Failed to copy path', true);
+        }
+    }
+
+    async copySelectedText(text) {
+        try {
+            let copySuccess = false;
+            
+            // Method 1: Neutralino clipboard API
+            if (window.Neutralino && Neutralino.clipboard) {
+                try {
+                    await Neutralino.clipboard.writeText(text);
+                    copySuccess = true;
+                } catch (neutralinoError) {
+                    console.warn('Neutralino clipboard failed:', neutralinoError);
+                }
+            }
+            
+            // Method 2: Web Clipboard API
+            if (!copySuccess && navigator.clipboard) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    copySuccess = true;
+                } catch (webClipboardError) {
+                    console.warn('Web clipboard API failed:', webClipboardError);
+                }
+            }
+            
+            // Method 3: Fallback selection method
+            if (!copySuccess) {
+                try {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    textArea.style.position = 'fixed';
+                    textArea.style.opacity = '0';
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    copySuccess = true;
+                } catch (fallbackError) {
+                    console.warn('Fallback copy method failed:', fallbackError);
+                }
+            }
+            
+            if (copySuccess) {
+                this.showNotification(`Text copied to clipboard`);
+            } else {
+                this.showNotification('Failed to copy text', true);
+            }
+        } catch (error) {
+            console.warn('Failed to copy selected text:', error);
+            this.showNotification('Failed to copy text', true);
         }
     }
 
@@ -1494,6 +1561,7 @@ class MarkdownBuddy {
                         <li>Press <kbd>F1</kbd> for keyboard shortcuts</li>
                         <li>Right-click items for context menu</li>
                         <li>Use <kbd>Ctrl/Cmd+F</kbd> to search</li>
+                        <li>Use <kbd>Ctrl/Cmd+C</kbd> to copy selected text</li>
                         <li>Double-click folders to open folder view</li>
                     </ul>
                 </div>

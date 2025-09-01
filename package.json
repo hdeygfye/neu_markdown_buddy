@@ -17,6 +17,6 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@neutralinojs/neu": "^10.0.0"
+    "@neutralinojs/neu": "^10.1.1"
   }
 }
