@@ -34,6 +34,7 @@ A modern, feature-rich desktop application for browsing and viewing markdown-bas
 - **🎨 Visual Feedback** - Smooth animations and modern UI interactions
 - **🧰 Toolbar with Labeled Actions** - Home, Collapse/Expand All, Refresh, Help, Pin, Theme, Zoom-/Zoom+
 - **📁 Sidebar Controls** - Width toggle/expand/collapse with saved width
+- **🎲 Random Tutorial (Home)** - One-click action to open a random tutorial from the library
 
 ### 🪟 **Window Management**
 
@@ -135,6 +136,10 @@ neu build
 - Collapse Sidebar: Fully collapse to icon bar (Cmd/Ctrl+Shift+B)
 - Search Box: Type to filter tutorials; results list shows names and paths; Esc clears
 - Inline Actions: Collapse/Expand/Refresh buttons at the top of navigation
+
+### 🏠 Home Actions
+
+- Random Tutorial: On the home screen, click “Random Tutorial” to jump to a random tutorial. A toast will show the picked title.
 
 ### 🔥 **Quick Start Shortcuts**
 

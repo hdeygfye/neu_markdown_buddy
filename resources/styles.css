@@ -1223,6 +1223,21 @@ body {
     gap: 20px;
 }
 
+/* Tutorial Prev/Next Navigation */
+.tutorial-navigation {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+}
+.tutorial-navigation .tutorial-nav-spacer {
+    flex: 1;
+}
+.tutorial-navigation .btn-secondary[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 /* Table of Contents */
 .table-of-contents {
     background: white;
@@ -1353,6 +1368,40 @@ body {
     max-width: 1000px;
     margin: 0 auto;
 }
+
+/* Home Stats */
+.home-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+.home-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.stat-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+}
+.stat-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #111827;
+}
+.stat-label {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* Dark theme overrides for new components */
+body.theme-dark .home-stats .stat-card { background: #0f172a; border-color: #1f2937; }
+body.theme-dark .home-stats .stat-value { color: #e5e7eb; }
+body.theme-dark .home-stats .stat-label { color: #9ca3af; }
 
 .folder-header {
     background: white;

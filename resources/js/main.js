@@ -831,7 +831,8 @@ class MarkdownBuddy {
                 text: 'Open Folder View',
                 action: () => {
                     const path = this.getItemPath(item);
-                    const title = item.querySelector('i').nextSibling.textContent.trim();
+                    const textEl = item.querySelector('.nav-folder-text, .nav-file-text');
+                    const title = textEl ? textEl.textContent.trim() : '';
                     this.showFolderContents(path, title);
                 }
             });
@@ -893,16 +894,17 @@ class MarkdownBuddy {
     }
 
     getItemPath(item) {
-        // Navigate up to find the full path
+        // Walk up the DOM building a path from visible labels
         let path = '';
         let current = item;
-        
-        while (current && current.classList.contains('nav-file') || current.classList.contains('nav-folder')) {
-            const text = current.querySelector('i').nextSibling.textContent.trim();
-            path = text + (path ? '/' + path : '');
-            current = current.parentElement.closest('.nav-folder');
+
+        while (current && (current.classList?.contains('nav-file') || current.classList?.contains('nav-folder'))) {
+            const textEl = current.querySelector('.nav-file-text, .nav-folder-text');
+            const label = textEl ? textEl.textContent.trim() : '';
+            path = label + (path ? '/' + path : '');
+            current = current.parentElement?.closest('.nav-folder');
         }
-        
+
         return path;
     }
 
@@ -2075,6 +2077,9 @@ class MarkdownBuddy {
                 htmlContent = `<pre>${markdownContent}</pre>`;
             }
             
+            // Compute prev/next navigation within the folder
+            const { prev, next } = this.getPrevNextTutorial(path);
+
             const content = `
                 <div class="tutorial-content">
                     <div class="tutorial-header">
@@ -2098,6 +2103,15 @@ class MarkdownBuddy {
                         </div>
                         <div class="markdown-content">
                             ${htmlContent}
+                        </div>
+                        <div class="tutorial-navigation">
+                            <button class="btn-secondary" ${prev ? '' : 'disabled'} ${prev ? `onclick=\"markdownBuddy.loadTutorial('${prev.path}','${prev.title.replace(/['"\\]/g, '')}')\"` : ''}>
+                                <i class="fas fa-arrow-left"></i> ${prev ? `Prev: ${prev.title}` : 'Previous'}
+                            </button>
+                            <div class="tutorial-nav-spacer"></div>
+                            <button class="btn-secondary" ${next ? '' : 'disabled'} ${next ? `onclick=\"markdownBuddy.loadTutorial('${next.path}','${next.title.replace(/['"\\]/g, '')}')\"` : ''}>
+                                ${next ? `Next: ${next.title}` : 'Next'} <i class="fas fa-arrow-right"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -2131,6 +2145,49 @@ class MarkdownBuddy {
         } catch (error) {
             console.error('Failed to load tutorial:', error);
             this.showError('Failed to load tutorial. Please try again.');
+        }
+    }
+
+    getPrevNextTutorial(path) {
+        try {
+            // Normalize path (strip leading resources/ if present)
+            const relPath = path.startsWith('resources/') ? path.replace(/^resources\/tutorials\//, '') : path;
+            const parts = relPath.split('/');
+            if (parts.length < 1) return { prev: null, next: null };
+
+            const fileKey = parts.pop();
+            const parentPath = parts.join('/');
+
+            // Find parent folder children
+            const parentData = this.getFolderData(parentPath);
+            const children = parentData && parentData.children ? parentData.children : null;
+            if (!children) return { prev: null, next: null };
+
+            // Collect only files within this folder
+            const files = Object.keys(children)
+                .filter(k => children[k].type === 'file')
+                .map(k => ({ key: k, item: children[k] }));
+
+            if (files.length === 0) return { prev: null, next: null };
+
+            // Sort by display name for stable navigation
+            files.sort((a, b) => (a.item.name || a.key).localeCompare(b.item.name || b.key, undefined, { sensitivity: 'base' }));
+
+            const idx = files.findIndex(f => f.key === fileKey || f.item.path === path || f.item.path?.endsWith('/' + fileKey));
+            if (idx === -1) return { prev: null, next: null };
+
+            const mk = (entry) => entry ? {
+                path: parentPath ? `${parentPath}/${entry.key}` : entry.key,
+                title: entry.item.name || entry.key.replace(/\.md$/, '')
+            } : null;
+
+            return {
+                prev: mk(files[idx - 1] || null),
+                next: mk(files[idx + 1] || null)
+            };
+        } catch (e) {
+            console.warn('getPrevNextTutorial failed:', e);
+            return { prev: null, next: null };
         }
     }
 
@@ -2521,7 +2578,24 @@ class MarkdownBuddy {
         let folderHtml = '';
         
         if (this.navigationData && Object.keys(this.navigationData).length > 0) {
-            folderHtml += '<h2><i class="fas fa-folder"></i> Tutorial Categories</h2><div class="folder-grid">';
+            const stats = this._computeStats();
+            const statsHtml = `
+                <div class="home-stats">
+                    <div class="stat-card"><div class="stat-value">${stats.tutorials}</div><div class="stat-label">Tutorials</div></div>
+                    <div class="stat-card"><div class="stat-value">${stats.categories}</div><div class="stat-label">Categories</div></div>
+                    <div class="stat-card"><div class="stat-value">${stats.updated}</div><div class="stat-label">Updated</div></div>
+                </div>
+            `;
+
+            const actionsHtml = `
+                <div class="home-actions">
+                    <button class="btn-secondary" onclick="markdownBuddy.openRandomTutorial()" title="Open a random tutorial">
+                        <i class="fas fa-random"></i> Random Tutorial
+                    </button>
+                </div>
+            `;
+
+            folderHtml += statsHtml + actionsHtml + '<h2><i class="fas fa-folder"></i> Tutorial Categories</h2><div class="folder-grid">';
             
             Object.keys(this.navigationData).forEach(key => {
                 const item = this.navigationData[key];
@@ -2595,6 +2669,54 @@ class MarkdownBuddy {
         document.querySelectorAll('.nav-folder, .nav-file').forEach(item => {
             item.classList.remove('active');
         });
+    }
+
+    _computeStats() {
+        // Count total tutorials (files) and top-level categories
+        let tutorials = 0;
+        const countFiles = (node) => {
+            Object.values(node).forEach(item => {
+                if (item.type === 'file') tutorials += 1;
+                if (item.type === 'folder' && item.children) countFiles(item.children);
+            });
+        };
+        try { countFiles(this.navigationData || {}); } catch {}
+        const categories = this.navigationData ? Object.keys(this.navigationData).length : 0;
+        // Simple relative time display
+        const updated = 'just now';
+        return { tutorials, categories, updated };
+    }
+
+    getAllTutorialFiles() {
+        const files = [];
+        const walk = (node, prefix = '') => {
+            Object.keys(node || {}).forEach(key => {
+                const item = node[key];
+                if (!item) return;
+                if (item.type === 'file') {
+                    const path = item.path ? item.path : (prefix ? `${prefix}/${key}` : key);
+                    const title = item.name || key.replace(/\.md$/, '');
+                    files.push({ path, title });
+                } else if (item.type === 'folder' && item.children) {
+                    const newPrefix = prefix ? `${prefix}/${key}` : key;
+                    walk(item.children, newPrefix);
+                }
+            });
+        };
+        try { walk(this.navigationData || {}, ''); } catch {}
+        return files;
+    }
+
+    openRandomTutorial() {
+        const files = this.getAllTutorialFiles();
+        if (!files.length) {
+            this.showNotification('No tutorials found', true);
+            return;
+        }
+        const idx = Math.floor(Math.random() * files.length);
+        const pick = files[idx];
+        this.loadTutorial(pick.path, pick.title);
+        try { this.showNotification(`Random: ${pick.title}`); } catch {}
     }
 
     showError(message) {
