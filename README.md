@@ -20,6 +20,8 @@ A modern, feature-rich desktop application for browsing and viewing markdown-bas
 - **One-Click Code Copying** - Copy any code block with a single click
 - **Smooth Anchor Navigation** - Jump to sections with smooth scrolling
 - **Responsive Design** - Optimized for desktop and mobile displays
+- **Light/Dark Theme Toggle** - Switch instantly via toolbar (sun/moon icon)
+- **Zoom Controls** - Zoom content from 80%–180% with a live indicator
 
 ### 🧭 **Advanced Navigation System**
 
@@ -30,6 +32,8 @@ A modern, feature-rich desktop application for browsing and viewing markdown-bas
 - **🎛️ Persistent State** - Remembers folder states and preferences
 - **📋 Auto-Generated TOC** - Table of contents with smooth scrolling
 - **🎨 Visual Feedback** - Smooth animations and modern UI interactions
+- **🧰 Toolbar with Labeled Actions** - Home, Collapse/Expand All, Refresh, Help, Pin, Theme, Zoom-/Zoom+
+- **📁 Sidebar Controls** - Width toggle/expand/collapse with saved width
 
 ### 🪟 **Window Management**
 
@@ -37,6 +41,7 @@ A modern, feature-rich desktop application for browsing and viewing markdown-bas
 - **Native Integration** - Proper desktop app behavior
 - **System Tray** - Quick access via system tray (Windows/Linux)
 - **Keyboard Shortcuts** - Comprehensive shortcut system
+- **Fast Quit** - Quit with Cmd/Ctrl+Q or Cmd/Ctrl+W (single-window app)
 
 ### ♿ **Accessibility & UX**
 
@@ -51,19 +56,19 @@ A modern, feature-rich desktop application for browsing and viewing markdown-bas
 
 ![Main Application Interface](screenshots/main.png)
 
-*The main interface showing the tutorial browser with enhanced navigation, syntax highlighting, and responsive sidebar*
+The main interface showing the tutorial browser with enhanced navigation, syntax highlighting, and a responsive sidebar.
 
 ### Advanced Application Features
 
 ![Advanced Application Features](screenshots/application.png)
 
-*Enhanced view showcasing the expandable navigation system, deep folder structures, and improved content display*
+Enhanced view showcasing the expandable navigation system, deep folder structures, and improved content display.
 
 ### Smart Search Functionality
 
 ![Smart Search Feature](screenshots/search.png)
 
-*Real-time search with instant filtering, highlighted matches, and keyboard navigation support*
+Real-time search with instant filtering, highlighted matches, and keyboard navigation support.
 
 ## 🚀 Installation
 
@@ -113,6 +118,24 @@ neu build
 
 ## 🎮 Navigation & Usage Guide
 
+### 🧰 Toolbar & UI Controls
+
+- Home: Go to the welcome page
+- Collapse All: Collapse all folders (shows a brief busy spinner)
+- Expand All: Expand all folders (shows a brief busy spinner)
+- Refresh: Re-scan tutorials and rebuild navigation (busy spinner)
+- Help: Open in-app keyboard shortcut help (F1)
+- Pin: Toggle Always on Top (Cmd/Ctrl+T)
+- Theme: Toggle light/dark; icon switches sun/moon; persists
+- Zoom-/Zoom+: Adjust content size (80%–180%); indicator shows current zoom; persists
+
+### 📚 Sidebar Controls
+
+- Width Toggle: Switch between normal and expanded width; persists exact width
+- Collapse Sidebar: Fully collapse to icon bar (Cmd/Ctrl+Shift+B)
+- Search Box: Type to filter tutorials; results list shows names and paths; Esc clears
+- Inline Actions: Collapse/Expand/Refresh buttons at the top of navigation
+
 ### 🔥 **Quick Start Shortcuts**
 
 - **`F1`** - Show keyboard shortcuts help
@@ -120,6 +143,9 @@ neu build
 - **`Ctrl/Cmd + H`** - Go to home
 - **`Ctrl/Cmd + T`** - Toggle always on top
 - **`Ctrl/Cmd + R`** - Refresh navigation
+- **`Ctrl/Cmd + B`** - Toggle sidebar width (normal/expanded)
+- **`Ctrl/Cmd + Shift + B`** - Collapse sidebar
+- **`Ctrl/Cmd + Q`** or **`Ctrl/Cmd + W`** - Quit the app
 - **`Esc`** - Clear search / Close dialogs
 
 ### 🖱️ **Mouse Navigation**
@@ -150,6 +176,17 @@ neu build
 - **Smooth scrolling** - Click to jump to sections
 - **Toggle visibility** - Show/hide with button
 
+### 🧠 Persistence & Settings
+
+- Theme, zoom level, sidebar state, and sidebar width are saved automatically
+- Notifications confirm actions like toggling Always on Top or changing navigation state
+- Settings are stored locally per device
+
+### 🧯 Quit & Tray Behavior
+
+- Quit via keyboard: Cmd/Ctrl+Q or Cmd/Ctrl+W (no toolbar quit button)
+- Tray menu is enabled on Windows/Linux; macOS uses standard app menu/shortcuts
+
 ### 📁 **Folder Management**
 
 - **Persistent state** - Folder open/closed states remembered
@@ -165,12 +202,13 @@ neu build
 - **Vanilla JavaScript ES6+** - Modern JavaScript without heavy frameworks
 - **Marked.js** - Fast markdown parser and compiler
 - **Highlight.js** - Syntax highlighting for 20+ languages
+- Code style: GitHub Dark theme
 - **Font Awesome** - Professional icons and visual elements
 - **Modern CSS3** - Grid, Flexbox, animations, and responsive design
 
 ### Supported Programming Languages
 
-```
+```text
 Python, Java, PHP, JavaScript, TypeScript, C++, C#
 Bash, PowerShell, SQL, JSON, YAML, XML, HTML
 Docker, Go, Rust, Swift, Kotlin, Ruby, Perl
@@ -179,7 +217,7 @@ And many more...
 
 ## 📂 Project Structure
 
-```
+```text
 neu_markdown_buddy/
 ├── 📁 resources/
 │   ├── 📄 index.html          # Main application HTML
@@ -278,9 +316,9 @@ neu update
 
 ## Links
 
-- **Original PHP Version:** https://github.com/codecaine-zz/markdown_tutorials
-- **Live Demo:** https://codefreelance.net/apps/markdown_buddy/?page=home
-- **NeutralinoJS Documentation:** https://neutralino.js.org/docs/
+- Original PHP Version: [codecaine-zz/markdown_tutorials](https://github.com/codecaine-zz/markdown_tutorials)
+- Live Demo: [codefreelance.net/apps/markdown_buddy](https://codefreelance.net/apps/markdown_buddy/?page=home)
+- NeutralinoJS Documentation: [neutralino.js.org/docs](https://neutralino.js.org/docs/)
 
 [![Contributors](https://contrib.rocks/image?repo=neutralinojs/neutralinojs-minimal)](https://github.com/neutralinojs/neutralinojs-minimal/graphs/contributors)
 

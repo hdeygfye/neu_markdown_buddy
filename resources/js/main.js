@@ -7,8 +7,12 @@ class MarkdownBuddy {
         this.tutorialsDir = '';
         this.navigationData = {};
         this.settings = {
-            alwaysOnTop: false
+            alwaysOnTop: false,
+            theme: 'light',
+            zoom: 1,
+            sidebarWidth: null
         };
+    this.isQuitting = false;
         this.init();
     }
 
@@ -62,6 +66,10 @@ class MarkdownBuddy {
             
             // Apply saved sidebar state
             this.applySidebarState();
+            // Apply saved theme and zoom
+            this.applyTheme();
+            this.applyZoom();
+            this.applySavedSidebarWidth();
             
         } catch (error) {
             console.warn('Failed to load settings:', error);
@@ -76,12 +84,52 @@ class MarkdownBuddy {
         }
     }
 
+    applySavedSidebarWidth() {
+        const sidebar = document.getElementById('sidebar');
+        if (!sidebar) return;
+        if (this.settings.sidebarWidth && !sidebar.classList.contains('collapsed')) {
+            sidebar.style.width = this.settings.sidebarWidth + 'px';
+            document.documentElement.style.setProperty('--sidebar-width', `${this.settings.sidebarWidth}px`);
+        }
+    }
+
     async saveSettings() {
         try {
             localStorage.setItem('markdownBuddySettings', JSON.stringify(this.settings));
         } catch (error) {
             console.warn('Failed to save settings:', error);
         }
+    }
+
+    applyTheme() {
+        document.body.classList.toggle('theme-dark', this.settings.theme === 'dark');
+        const themeBtn = document.getElementById('appThemeToggleBtn');
+        const icon = document.getElementById('appThemeIcon');
+        if (themeBtn) {
+            themeBtn.title = this.settings.theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+        }
+        if (icon) {
+            icon.className = this.settings.theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+    }
+
+    toggleTheme() {
+        this.settings.theme = this.settings.theme === 'dark' ? 'light' : 'dark';
+        this.applyTheme();
+        this.saveSettings();
+    }
+
+    applyZoom() {
+        const zoom = Math.min(1.8, Math.max(0.8, this.settings.zoom || 1));
+        document.documentElement.style.setProperty('--content-zoom', String(zoom));
+        const indicator = document.getElementById('zoomIndicator');
+        if (indicator) indicator.textContent = `${Math.round(zoom * 100)}%`;
+    }
+
+    changeZoom(delta) {
+        this.settings.zoom = Math.min(1.8, Math.max(0.8, (this.settings.zoom || 1) + delta));
+        this.applyZoom();
+        this.saveSettings();
     }
 
     async setAlwaysOnTop(alwaysOnTop) {
@@ -127,16 +175,19 @@ class MarkdownBuddy {
             sidebar.classList.remove('expanded');
             this.settings.sidebarState = 'normal';
             toggleIcon.className = 'fas fa-arrows-alt-h';
+            document.documentElement.style.setProperty('--sidebar-width', `${this.settings.sidebarWidth || sidebar.offsetWidth}px`);
         } else if (sidebar.classList.contains('collapsed')) {
             // From collapsed to normal
             sidebar.classList.remove('collapsed');
             this.settings.sidebarState = 'normal';
             toggleIcon.className = 'fas fa-arrows-alt-h';
+            document.documentElement.style.setProperty('--sidebar-width', `${this.settings.sidebarWidth || 350}px`);
         } else {
             // From normal to expanded
             sidebar.classList.add('expanded');
             this.settings.sidebarState = 'expanded';
             toggleIcon.className = 'fas fa-compress-alt';
+            document.documentElement.style.setProperty('--sidebar-width', `${sidebar.offsetWidth}px`);
         }
         
         // Refresh navigation to update text truncation
@@ -168,6 +219,7 @@ class MarkdownBuddy {
         sidebar.classList.add('collapsed');
         this.settings.sidebarState = 'collapsed';
         toggleIcon.className = 'fas fa-expand-alt';
+    document.documentElement.style.setProperty('--sidebar-width', getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width-collapsed'));
         
         this.saveSettings();
         this.showNotification('Navigation collapsed', false, 1500);
@@ -301,6 +353,34 @@ class MarkdownBuddy {
             });
         }
 
+        // Toolbar actions
+        const byId = (id) => document.getElementById(id);
+        byId('appHomeBtn')?.addEventListener('click', () => this.showWelcomeContent());
+    byId('appCollapseAllBtn')?.addEventListener('click', (e) => this._withBusyIcon(e.currentTarget, 'fa-compress-arrows-alt', () => this.collapseAllFolders()));
+    byId('appExpandAllBtn')?.addEventListener('click', (e) => this._withBusyIcon(e.currentTarget, 'fa-expand-arrows-alt', () => this.expandAllFolders()));
+    byId('appRefreshBtn')?.addEventListener('click', (e) => this._withBusyIcon(e.currentTarget, 'fa-sync-alt', () => this.refreshNavigation()));
+        byId('appHelpBtn')?.addEventListener('click', () => this.showKeyboardHelp());
+        byId('appAlwaysOnTopBtn')?.addEventListener('click', () => this.toggleAlwaysOnTop());
+        byId('appThemeToggleBtn')?.addEventListener('click', () => this.toggleTheme());
+        byId('appZoomInBtn')?.addEventListener('click', () => this.changeZoom(0.1));
+    byId('appZoomOutBtn')?.addEventListener('click', () => this.changeZoom(-0.1));
+
+        // Observe sidebar width changes to keep CSS var in sync and persist
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar && !this._sidebarResizeObserver) {
+            this._sidebarResizeObserver = new ResizeObserver((entries) => {
+                for (const entry of entries) {
+                    const width = Math.round(entry.contentRect.width);
+                    if (!sidebar.classList.contains('collapsed')) {
+                        document.documentElement.style.setProperty('--sidebar-width', `${width}px`);
+                        this.settings.sidebarWidth = width;
+                        this.saveSettings();
+                    }
+                }
+            });
+            this._sidebarResizeObserver.observe(sidebar);
+        }
+
         // Enhanced keyboard navigation and shortcuts
         this.setupKeyboardNavigation();
 
@@ -312,6 +392,20 @@ class MarkdownBuddy {
 
         // Setup drag and drop (for future bookmarking)
         this.setupDragAndDrop();
+    }
+
+    _withBusyIcon(button, baseIcon, action) {
+        try {
+            const icon = button?.querySelector('i');
+            if (!icon) { action(); return; }
+            const original = icon.className;
+            icon.className = `fas ${baseIcon} busy`;
+            Promise.resolve(action()).finally(() => {
+                setTimeout(() => { icon.className = original; }, 400);
+            });
+        } catch {
+            action();
+        }
     }
 
     setupKeyboardNavigation() {
@@ -367,6 +461,13 @@ class MarkdownBuddy {
 
             // Quit app shortcut (Cmd+Q on Mac, Ctrl+Q on other platforms)
             if ((event.metaKey || event.ctrlKey) && event.key === 'q') {
+                event.preventDefault();
+                this.quitApplication();
+                return;
+            }
+
+            // Also map Cmd+W (close window) to quit, since it's a single-window app
+            if ((event.metaKey || event.ctrlKey) && (event.key === 'w' || event.key === 'W')) {
                 event.preventDefault();
                 this.quitApplication();
                 return;
@@ -901,12 +1002,17 @@ class MarkdownBuddy {
                     `Markdown Buddy - Tutorial Browser\nBuilt with NeutralinoJS\n\nServer: v${NL_VERSION} | Client: v${NL_CVERSION}`);
                 break;
             case "QUIT":
-                Neutralino.app.exit();
+                this.isQuitting = true;
+                try { Neutralino.app.exit(); } catch(e) { try { window.close(); } catch(_) {} }
                 break;
         }
     }
 
     onWindowClose() {
+        if (this.isQuitting) {
+            // Avoid triggering extra logic while quitting
+            return;
+        }
         try {
             Neutralino.app.exit();
         } catch (error) {
@@ -919,28 +1025,25 @@ class MarkdownBuddy {
     }
 
     quitApplication() {
-        // Avoid Neutralino.app.exit() as it causes threading issues on macOS
-        // when saving window properties. Just use window.close() which is safer.
-        setTimeout(() => {
-            try {
-                // Simply close the window - this will terminate the app cleanly
-                if (window.close) {
-                    window.close();
-                } else {
-                    // Fallback for environments where window.close might not work
-                    console.warn('window.close() not available, attempting Neutralino exit');
-                    Neutralino.app.exit();
-                }
-            } catch (error) {
-                console.warn('Error during quit application:', error);
-                // Last resort - try to exit anyway
-                try {
-                    Neutralino.app.exit();
-                } catch (e) {
-                    console.error('Could not quit application:', e);
-                }
+    if (this.isQuitting) return;
+    this.isQuitting = true;
+    try { this.showNotification('Quitting…'); } catch(_) {}
+        try {
+            if (typeof Neutralino !== 'undefined' && Neutralino.app && typeof Neutralino.app.exit === 'function') {
+                // Use Neutralino app exit for reliable termination on macOS/window mode
+                Neutralino.app.exit();
+                return;
             }
-        }, 10);
+        } catch (e) {
+            console.warn('Neutralino.app.exit failed, falling back to window.close()', e);
+        }
+        try {
+            if (typeof window !== 'undefined' && typeof window.close === 'function') {
+                window.close();
+            }
+        } catch (err) {
+            console.error('Fallback window.close() failed:', err);
+        }
     }
 
     async initializeApp() {
@@ -1358,16 +1461,16 @@ class MarkdownBuddy {
             </div>
             <div class="nav-actions">
                 <button class="nav-action-btn" onclick="markdownBuddy.collapseAllFolders()" title="Collapse all folders">
-                    <i class="fas fa-compress-arrows-alt"></i>
+                    <i class="fas fa-compress-arrows-alt"></i> <span>Collapse</span>
                 </button>
                 <button class="nav-action-btn" onclick="markdownBuddy.expandAllFolders()" title="Expand all folders">
-                    <i class="fas fa-expand-arrows-alt"></i>
+                    <i class="fas fa-expand-arrows-alt"></i> <span>Expand</span>
                 </button>
                 <button class="nav-action-btn" onclick="markdownBuddy.refreshNavigation()" title="Refresh navigation">
-                    <i class="fas fa-sync-alt"></i>
+                    <i class="fas fa-sync-alt"></i> <span>Refresh</span>
                 </button>
                 <button class="nav-action-btn" onclick="markdownBuddy.showKeyboardHelp()" title="Keyboard shortcuts (F1)">
-                    <i class="fas fa-keyboard"></i>
+                    <i class="fas fa-keyboard"></i> <span>Help</span>
                 </button>
             </div>
         `;
@@ -2022,6 +2125,8 @@ class MarkdownBuddy {
             
             // Store current path
             this.currentPath = path;
+            // Re-apply zoom indicator after content swap
+            this.applyZoom();
             
         } catch (error) {
             console.error('Failed to load tutorial:', error);
@@ -2797,7 +2902,7 @@ let markdownBuddy;
 // Function to initialize app with error handling
 function initializeMarkdownBuddy() {
     try {
-        markdownBuddy = new MarkdownBuddy();
+    markdownBuddy = new MarkdownBuddy();
     } catch (error) {
         console.error('Failed to create MarkdownBuddy instance:', error);
         // Try to show error in the UI
@@ -2831,6 +2936,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     markdownBuddy = new MarkdownBuddy();
                     markdownBuddy.initializeDemoMode();
+                    markdownBuddy.applyZoom();
                 } catch (error) {
                     console.error('Failed to initialize demo mode:', error);
                 }

@@ -54,6 +54,51 @@
             </div>
         </nav>
         
+        <!-- App Toolbar -->
+        <header class="app-toolbar" id="appToolbar" aria-label="Application toolbar">
+            <div class="toolbar-left">
+                <img src="/resources/icons/appIcon.png" alt="Markdown Buddy" class="app-logo" />
+                <span class="app-title">Markdown Buddy</span>
+            </div>
+            <div class="toolbar-center">
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" id="appHomeBtn" title="Home">
+                        <i class="fas fa-home"></i><span class="btn-label">Home</span>
+                    </button>
+                    <button class="toolbar-btn" id="appCollapseAllBtn" title="Collapse all (folders)">
+                        <i class="fas fa-compress-arrows-alt"></i><span class="btn-label">Collapse</span>
+                    </button>
+                    <button class="toolbar-btn" id="appExpandAllBtn" title="Expand all (folders)">
+                        <i class="fas fa-expand-arrows-alt"></i><span class="btn-label">Expand</span>
+                    </button>
+                    <button class="toolbar-btn" id="appRefreshBtn" title="Refresh navigation">
+                        <i class="fas fa-sync-alt"></i><span class="btn-label">Refresh</span>
+                    </button>
+                    <button class="toolbar-btn" id="appHelpBtn" title="Keyboard shortcuts (F1)">
+                        <i class="fas fa-keyboard"></i><span class="btn-label">Help</span>
+                    </button>
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" id="appAlwaysOnTopBtn" title="Toggle Always on Top (Cmd/Ctrl+T)">
+                        <i class="fas fa-thumbtack"></i><span class="btn-label">Pin</span>
+                    </button>
+                    <button class="toolbar-btn" id="appThemeToggleBtn" title="Toggle theme">
+                        <i id="appThemeIcon" class="fas fa-moon"></i><span class="btn-label">Theme</span>
+                    </button>
+                    <div class="toolbar-sep"></div>
+                    <button class="toolbar-btn" id="appZoomOutBtn" title="Decrease content size" onclick="window.markdownBuddy && markdownBuddy.changeZoom(-0.1)">
+                        <i class="fas fa-minus"></i><span class="btn-label">Zoom-</span>
+                    </button>
+                    <span class="zoom-indicator" id="zoomIndicator">100%</span>
+                    <button class="toolbar-btn" id="appZoomInBtn" title="Increase content size" onclick="window.markdownBuddy && markdownBuddy.changeZoom(0.1)">
+                        <i class="fas fa-plus"></i><span class="btn-label">Zoom+</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+        
         <!-- Main Content -->
         <main class="main-content" id="main-content">
             <div class="welcome-content">
