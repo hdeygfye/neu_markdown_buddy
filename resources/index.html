@@ -41,6 +41,7 @@
             </button>
             <div class="sidebar-header">
                 <h2><i class="fas fa-book"></i> Markdown Buddy</h2>
+                
                 <div class="window-controls">
                     <label class="toggle-control" title="Keep window on top of all other windows (Cmd/Ctrl+T)">
                         <input type="checkbox" id="alwaysOnTopToggle">
@@ -66,6 +67,25 @@
                 <span class="app-title">Markdown Buddy</span>
             </div>
             <div class="toolbar-center">
+                <!-- Search Box - Moved to toolbar for better visibility -->
+                <div class="search-container toolbar-search">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input 
+                            type="text" 
+                            id="tutorialSearch" 
+                            placeholder="Search tutorials..."
+                            class="search-input"
+                            autocomplete="off"
+                            spellcheck="false"
+                        >
+                        <button class="search-clear" id="searchClear" title="Clear search">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+                
                 <div class="toolbar-group">
                     <button class="toolbar-btn" id="appPreviousBtn" title="Go back to previous page" disabled>
                         <i class="fas fa-arrow-left"></i><span class="btn-label">Previous</span>
@@ -110,38 +130,147 @@
         <!-- Main Content -->
         <main class="main-content" id="main-content">
             <div class="welcome-content">
-                <h1><i class="fas fa-rocket"></i> Welcome to Markdown Buddy</h1>
-                <p class="subtitle">Your comprehensive markdown tutorial browser powered by NeutralinoJS</p>
+                <div class="welcome-hero">
+                    <div class="hero-content">
+                        <div class="hero-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <h1>Welcome to Markdown Buddy</h1>
+                        <p class="subtitle">Your comprehensive markdown tutorial browser powered by NeutralinoJS</p>
+                        <div class="hero-stats">
+                            <div class="stat-item">
+                                <span class="stat-number" id="tutorialCount">150+</span>
+                                <span class="stat-label">Tutorials</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">20+</span>
+                                <span class="stat-label">Languages</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">5</span>
+                                <span class="stat-label">Categories</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-decoration">
+                        <div class="floating-element floating-1"></div>
+                        <div class="floating-element floating-2"></div>
+                        <div class="floating-element floating-3"></div>
+                    </div>
+                </div>
                 
-                <div class="features-grid">
-                    <div class="feature-card">
-                        <i class="fas fa-book-open"></i>
-                        <h3>Interactive Tutorials</h3>
-                        <p>Browse through organized tutorial collections with ease</p>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <i class="fas fa-code"></i>
-                        <h3>Syntax Highlighting</h3>
-                        <p>Code blocks highlighted for 20+ programming languages</p>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <i class="fas fa-mobile-alt"></i>
-                        <h3>Responsive Design</h3>
-                        <p>Works seamlessly on desktop and mobile devices</p>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <i class="fas fa-copy"></i>
-                        <h3>Copy to Clipboard</h3>
-                        <p>One-click copying for all code blocks</p>
+                <div class="features-section">
+                    <h2>Why Choose Markdown Buddy?</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                            <h3>Interactive Tutorials</h3>
+                            <p>Browse through organized tutorial collections with intuitive navigation and search capabilities</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <h3>Syntax Highlighting</h3>
+                            <p>Beautiful code blocks with highlighting for 20+ programming languages including Python, JavaScript, and more</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <h3>Responsive Design</h3>
+                            <p>Seamless experience across desktop and mobile devices with adaptive layout and touch-friendly controls</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-copy"></i>
+                            </div>
+                            <h3>Copy to Clipboard</h3>
+                            <p>One-click copying for all code blocks with visual feedback and keyboard shortcuts</p>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h3>Smart Search</h3>
+                            <p>Find tutorials instantly with intelligent search that understands content, tags, and categories</p>
+                        </div>
+
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-palette"></i>
+                            </div>
+                            <h3>Theme Support</h3>
+                            <p>Switch between light and dark themes with system preference detection and custom styling options</p>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="getting-started">
                     <h2>Getting Started</h2>
-                    <p>Select a tutorial category from the sidebar to begin browsing tutorials. All your markdown files will be automatically parsed and rendered with syntax highlighting.</p>
+                    <div class="getting-started-content">
+                        <div class="quick-start-steps">
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <h4>Search Tutorials</h4>
+                                    <p>Use the search box in the top toolbar to quickly find tutorials by name or topic</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <h4>Browse Categories</h4>
+                                    <p>Select categories from the sidebar to explore tutorials by programming language or tool</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <div class="step-content">
+                                    <h4>Enjoy Learning</h4>
+                                    <p>Read tutorials with syntax highlighting and copy code examples with ease</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="quick-actions">
+                            <button class="action-btn primary" onclick="document.getElementById('tutorialSearch')?.focus()">
+                                <i class="fas fa-search"></i>
+                                Search Tutorials
+                            </button>
+                            <button class="action-btn secondary" onclick="document.querySelector('.nav-folder')?.click()">
+                                <i class="fas fa-folder-open"></i>
+                                Browse Categories
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="keyboard-shortcuts-preview">
+                    <h3>Keyboard Shortcuts</h3>
+                    <div class="shortcuts-grid">
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>B</kbd>
+                            <span>Toggle Sidebar</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>T</kbd>
+                            <span>Always on Top</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>F1</kbd>
+                            <span>Help</span>
+                        </div>
+                        <div class="shortcut-item">
+                            <kbd>Ctrl</kbd> + <kbd>/</kbd>
+                            <span>Search</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>

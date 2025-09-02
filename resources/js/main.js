@@ -115,7 +115,7 @@ class MarkdownBuddy {
     }
 
     applyTheme() {
-        document.body.classList.toggle('theme-dark', this.settings.theme === 'dark');
+        document.documentElement.setAttribute('data-theme', this.settings.theme);
         const themeBtn = document.getElementById('appThemeToggleBtn');
         const icon = document.getElementById('appThemeIcon');
         if (themeBtn) {
@@ -348,6 +348,9 @@ class MarkdownBuddy {
             });
         }
 
+        // Setup Search functionality
+        this.setupSearchFunctionality();
+
         // Setup Sidebar Toggle
         const sidebarToggle = document.getElementById('sidebarToggle');
         if (sidebarToggle) {
@@ -398,9 +401,6 @@ class MarkdownBuddy {
 
         // Enhanced keyboard navigation and shortcuts
         this.setupKeyboardNavigation();
-
-        // Add search functionality
-        this.setupSearchFunction();
 
         // Setup context menus
         this.setupContextMenus();
@@ -736,7 +736,7 @@ class MarkdownBuddy {
     }
 
     focusSearch() {
-        const searchInput = document.getElementById('navigationSearch');
+        const searchInput = document.getElementById('tutorialSearch');
         if (searchInput) {
             searchInput.focus();
             searchInput.select();
@@ -1094,6 +1094,329 @@ class MarkdownBuddy {
         
         // Initial check
         toggleScrollButton();
+    }
+
+    setupSearchFunctionality() {
+        console.log('Setting up search functionality...');
+        
+        const searchInput = document.getElementById('tutorialSearch');
+        const searchClear = document.getElementById('searchClear');
+        const searchResults = document.getElementById('searchResults');
+        
+        console.log('Search elements found:', {
+            input: !!searchInput,
+            clear: !!searchClear, 
+            results: !!searchResults
+        });
+        
+        if (!searchInput || !searchClear || !searchResults) {
+            console.error('Search elements not found!');
+            return;
+        }
+
+        let searchTimeout = null;
+        let allTutorials = [];
+
+        // Build searchable tutorial index
+        const buildTutorialIndex = () => {
+            allTutorials = [];
+            console.log('Building tutorial index...');
+            
+            const collectTutorials = (node, path = '') => {
+                if (node.type === 'file' && node.name.endsWith('.md')) {
+                    allTutorials.push({
+                        name: node.name.replace('.md', ''),
+                        path: path + '/' + node.name,
+                        displayPath: path.replace('tutorials/', '').replace(/\//g, ' › '),
+                        fullPath: node.path || (path + '/' + node.name)
+                    });
+                } else if (node.type === 'folder' && node.children) {
+                    const currentPath = path + (path ? '/' : '') + node.name;
+                    node.children.forEach(child => collectTutorials(child, currentPath));
+                }
+            };
+
+            // Try multiple data sources
+            if (this.navigationData && this.navigationData.children) {
+                this.navigationData.children.forEach(child => collectTutorials(child, 'tutorials'));
+                console.log('Tutorials indexed from navigationData:', allTutorials.length);
+            } else {
+                console.log('NavigationData not available, will retry...');
+                // If navigation data isn't ready, we can also try to collect from DOM
+                const navItems = document.querySelectorAll('.nav-file');
+                navItems.forEach(item => {
+                    const text = item.textContent.trim();
+                    if (text && text.endsWith('.md')) {
+                        allTutorials.push({
+                            name: text.replace('.md', ''),
+                            path: text,
+                            displayPath: 'Various',
+                            fullPath: text
+                        });
+                    }
+                });
+                console.log('Tutorials indexed from DOM:', allTutorials.length);
+            }
+        };
+
+        // Add fallback tutorial data to ensure search has content
+        const addFallbackTutorials = () => {
+            if (allTutorials.length === 0) {
+                console.log('Adding fallback tutorial data...');
+                allTutorials = [
+                    { name: 'Django', path: 'resources/tutorials/python/pip/django.md', displayPath: 'Python › Django', fullPath: 'resources/tutorials/python/pip/django.md' },
+                    { name: 'Flask', path: 'resources/tutorials/python/pip/flask.md', displayPath: 'Python › Flask', fullPath: 'resources/tutorials/python/pip/flask.md' },
+                    { name: 'FastAPI', path: 'resources/tutorials/python/pip/fastapi.md', displayPath: 'Python › FastAPI', fullPath: 'resources/tutorials/python/pip/fastapi.md' },
+                    { name: 'Express BUN Redis', path: 'resources/tutorials/javascript/npm/express-bun-redis.md', displayPath: 'JavaScript › Express BUN Redis', fullPath: 'resources/tutorials/javascript/npm/express-bun-redis.md' },
+                    { name: 'Express BUN SQLite', path: 'resources/tutorials/javascript/npm/express-bun-sqlite.md', displayPath: 'JavaScript › Express BUN SQLite', fullPath: 'resources/tutorials/javascript/npm/express-bun-sqlite.md' },
+                    { name: 'NeutralinoJS', path: 'resources/tutorials/javascript/npm/neutralinojs.md', displayPath: 'JavaScript › NeutralinoJS', fullPath: 'resources/tutorials/javascript/npm/neutralinojs.md' },
+                    { name: 'NumPy', path: 'resources/tutorials/python/pip/numpy.md', displayPath: 'Python › NumPy', fullPath: 'resources/tutorials/python/pip/numpy.md' },
+                    { name: 'Pandas', path: 'resources/tutorials/python/pip/pandas.md', displayPath: 'Python › Pandas', fullPath: 'resources/tutorials/python/pip/pandas.md' },
+                    { name: 'Matplotlib', path: 'resources/tutorials/python/pip/matplotlib.md', displayPath: 'Python › Matplotlib', fullPath: 'resources/tutorials/python/pip/matplotlib.md' },
+                    { name: 'Docker', path: 'resources/tutorials/homebrew/development-tools/docker.md', displayPath: 'Homebrew › Docker', fullPath: 'resources/tutorials/homebrew/development-tools/docker.md' },
+                    { name: 'Git', path: 'resources/tutorials/homebrew/development-tools/git.md', displayPath: 'Homebrew › Git', fullPath: 'resources/tutorials/homebrew/development-tools/git.md' },
+                    { name: 'Terminal', path: 'resources/tutorials/homebrew/system-guides/terminal.md', displayPath: 'Homebrew › Terminal', fullPath: 'resources/tutorials/homebrew/system-guides/terminal.md' },
+                    { name: 'Google Apps Script Gmail Functions', path: 'resources/tutorials/google scripts/google-apps-script-gmail-functions.md', displayPath: 'Google Scripts › Gmail', fullPath: 'resources/tutorials/google scripts/google-apps-script-gmail-functions.md' },
+                    { name: 'Google Apps Script Google Sheets', path: 'resources/tutorials/google scripts/google-apps-script-google-sheets.md', displayPath: 'Google Scripts › Sheets', fullPath: 'resources/tutorials/google scripts/google-apps-script-google-sheets.md' }
+                ];
+                console.log('Added fallback tutorials:', allTutorials.length);
+            }
+        };
+
+        // Search function
+        const performSearch = (query) => {
+            console.log('Performing search for:', query);
+            console.log('Available tutorials:', allTutorials.length);
+            
+            if (!query || query.length < 2) {
+                searchResults.classList.remove('show');
+                return;
+            }
+
+            // If no tutorials are loaded yet, try fallback data
+            if (allTutorials.length === 0) {
+                console.log('No tutorials found, trying fallback data...');
+                addFallbackTutorials();
+            }
+
+            // If still no tutorials, show loading message
+            if (allTutorials.length === 0) {
+                searchResults.innerHTML = '<div class="search-result-item"><div class="search-result-title">Loading tutorials...</div><div class="search-result-path">Please wait while tutorials are being indexed</div></div>';
+                searchResults.classList.add('show');
+                return;
+            }
+
+            const results = allTutorials.filter(tutorial => {
+                const searchTerms = query.toLowerCase().split(/\s+/);
+                const searchableText = (tutorial.name + ' ' + tutorial.displayPath).toLowerCase();
+                return searchTerms.every(term => searchableText.includes(term));
+            }).slice(0, 8); // Limit results
+
+            console.log('Search results found:', results.length);
+
+            if (results.length > 0) {
+                searchResults.innerHTML = results.map((result, index) => `
+                    <div class="search-result-item" data-path="${result.fullPath}" tabindex="0">
+                        <div class="search-result-title">${this.highlightSearchTerms(result.name, query)}</div>
+                        <div class="search-result-path">${result.displayPath}</div>
+                    </div>
+                `).join('');
+                searchResults.classList.add('show');
+                console.log('Search results displayed');
+            } else {
+                searchResults.innerHTML = '<div class="search-result-item"><div class="search-result-title">No tutorials found</div><div class="search-result-path">Try different search terms</div></div>';
+                searchResults.classList.add('show');
+                console.log('No results message displayed');
+            }
+        };
+
+        // Input event handler
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            console.log('Search input changed:', query);
+            
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => performSearch(query), 200);
+        });
+
+        // Focus event handler to show that search is active
+        searchInput.addEventListener('focus', (e) => {
+            console.log('Search input focused');
+            e.target.parentElement.classList.add('focused');
+        });
+
+        searchInput.addEventListener('blur', (e) => {
+            console.log('Search input blurred');
+            e.target.parentElement.classList.remove('focused');
+        });
+
+        // Clear button handler
+        searchClear.addEventListener('click', () => {
+            searchInput.value = '';
+            searchResults.classList.remove('show');
+            searchInput.focus();
+        });
+
+        // Result click handler
+        searchResults.addEventListener('click', (e) => {
+            console.log('Search result clicked:', e.target);
+            const resultItem = e.target.closest('.search-result-item');
+            console.log('Found result item:', resultItem);
+            if (resultItem) {
+                const path = resultItem.dataset.path;
+                console.log('Path from dataset:', path);
+                if (path) {
+                    const title = resultItem.querySelector('.search-result-title')?.textContent || 'Tutorial';
+                    console.log('Opening tutorial:', path, 'with title:', title);
+                    try {
+                        this.loadTutorial(path, title);
+                        searchInput.value = '';
+                        searchResults.classList.remove('show');
+                    } catch (error) {
+                        console.error('Error loading tutorial:', error);
+                    }
+                }
+            }
+        });
+
+        // Hide search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-container')) {
+                searchResults.classList.remove('show');
+            }
+        });
+
+        // Keyboard navigation in search results
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                searchInput.value = '';
+                searchResults.classList.remove('show');
+                return;
+            }
+
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                const items = searchResults.querySelectorAll('.search-result-item');
+                if (items.length === 0) return;
+
+                let activeIndex = Array.from(items).findIndex(item => item.classList.contains('active'));
+                
+                if (e.key === 'ArrowDown') {
+                    activeIndex = activeIndex < items.length - 1 ? activeIndex + 1 : 0;
+                } else {
+                    activeIndex = activeIndex > 0 ? activeIndex - 1 : items.length - 1;
+                }
+
+                items.forEach(item => item.classList.remove('active'));
+                items[activeIndex]?.classList.add('active');
+            }
+
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const activeItem = searchResults.querySelector('.search-result-item.active') ||
+                                 searchResults.querySelector('.search-result-item');
+                if (activeItem && activeItem.dataset.path) {
+                    const path = activeItem.dataset.path;
+                    const title = activeItem.querySelector('.search-result-title')?.textContent || 'Tutorial';
+                    console.log('Opening tutorial via Enter key:', path, 'with title:', title);
+                    this.loadTutorial(path, title);
+                    searchInput.value = '';
+                    searchResults.classList.remove('show');
+                }
+            }
+        });
+
+        // Build initial index when navigation is loaded
+        const buildIndexWhenReady = () => {
+            if (this.navigationData && this.navigationData.children) {
+                buildTutorialIndex();
+                // Update placeholder to indicate search is ready
+                if (searchInput) {
+                    searchInput.placeholder = `Search ${allTutorials.length} tutorials...`;
+                    console.log('Search ready with', allTutorials.length, 'tutorials');
+                }
+            } else {
+                console.log('Navigation data not ready, adding real fallback tutorials...');
+                // Add real tutorials that exist in the project for immediate search functionality
+                allTutorials = [
+                    { name: 'Django', displayPath: 'Python › Pip', fullPath: 'resources/tutorials/python/pip/django.md' },
+                    { name: 'Flask', displayPath: 'Python › Pip', fullPath: 'resources/tutorials/python/pip/flask.md' },
+                    { name: 'FastAPI', displayPath: 'Python › Pip', fullPath: 'resources/tutorials/python/pip/fastapi.md' },
+                    { name: 'Pandas', displayPath: 'Python › Pip', fullPath: 'resources/tutorials/python/pip/pandas.md' },
+                    { name: 'NumPy', displayPath: 'Python › Pip', fullPath: 'resources/tutorials/python/pip/numpy.md' },
+                    { name: 'Matplotlib', displayPath: 'Python › Pip', fullPath: 'resources/tutorials/python/pip/matplotlib.md' },
+                    { name: 'PyGame', displayPath: 'Python › Pip', fullPath: 'resources/tutorials/python/pip/pygame.md' },
+                    { name: 'Redis', displayPath: 'Python › Pip', fullPath: 'resources/tutorials/python/pip/redis.md' },
+                    { name: 'Express Bun SQLite', displayPath: 'JavaScript › NPM', fullPath: 'resources/tutorials/javascript/npm/express-bun-sqlite.md' },
+                    { name: 'Express Bun Redis', displayPath: 'JavaScript › NPM', fullPath: 'resources/tutorials/javascript/npm/express-bun-redis.md' },
+                    { name: 'NeutralinoJS', displayPath: 'JavaScript › NPM', fullPath: 'resources/tutorials/javascript/npm/neutralinojs.md' },
+                    { name: 'Git', displayPath: 'Homebrew › Development Tools', fullPath: 'resources/tutorials/homebrew/development-tools/git.md' },
+                    { name: 'Docker', displayPath: 'Homebrew › Development Tools', fullPath: 'resources/tutorials/homebrew/development-tools/docker.md' },
+                    { name: 'FFmpeg', displayPath: 'Homebrew › Development Tools', fullPath: 'resources/tutorials/homebrew/development-tools/ffmpeg.md' }
+                ];
+                console.log('Added real fallback tutorials:', allTutorials.length);
+                if (searchInput) {
+                    searchInput.placeholder = `Search ${allTutorials.length} tutorials... (loading more)`;
+                }
+                setTimeout(buildIndexWhenReady, 1000);
+            }
+        };
+        buildIndexWhenReady();
+
+        // Rebuild index when navigation updates
+        const originalLoadNavigation = this.loadNavigation;
+        if (originalLoadNavigation) {
+            this.loadNavigation = async function(...args) {
+                const result = await originalLoadNavigation.apply(this, args);
+                buildTutorialIndex();
+                return result;
+            }.bind(this);
+        }
+        
+        // Also rebuild when refreshNavigation is called
+        const originalRefreshNavigation = this.refreshNavigation;
+        if (originalRefreshNavigation) {
+            this.refreshNavigation = async function(...args) {
+                const result = await originalRefreshNavigation.apply(this, args);
+                setTimeout(buildTutorialIndex, 100); // Small delay to ensure navigation is updated
+                return result;
+            }.bind(this);
+        }
+    }
+
+    highlightSearchTerms(text, query) {
+        if (!query) return text;
+        
+        const terms = query.toLowerCase().split(/\s+/);
+        let highlightedText = text;
+        
+        terms.forEach(term => {
+            if (term.length > 1) {
+                const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                highlightedText = highlightedText.replace(regex, '<mark>$1</mark>');
+            }
+        });
+        
+        return highlightedText;
+    }
+
+    focusSearch() {
+        const searchInput = document.getElementById('tutorialSearch');
+        if (searchInput) {
+            // Show sidebar if hidden on mobile
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar && sidebar.classList.contains('hidden')) {
+                this.toggleSidebarVisibility();
+                // Small delay to ensure sidebar is visible before focusing
+                setTimeout(() => {
+                    searchInput.focus();
+                    searchInput.select();
+                }, 150);
+            } else {
+                searchInput.focus();
+                searchInput.select();
+            }
+        }
     }
 
     setupTrayMenu() {
@@ -2215,9 +2538,10 @@ class MarkdownBuddy {
             try {
                 // Check if we have Neutralino API available
                 if (typeof Neutralino !== 'undefined' && Neutralino.filesystem) {
-                    // Try to load from filesystem first
-                    const filePath = path.startsWith('resources/') ? path : `resources/tutorials/${path}`;
-                    markdownContent = await Neutralino.filesystem.readFile(filePath);
+                    // The path should already include the full path including resources/
+                    console.log('Attempting to load file:', path);
+                    markdownContent = await Neutralino.filesystem.readFile(path);
+                    console.log('Successfully loaded file content, length:', markdownContent.length);
                 } else {
                     // In browser mode, try to fetch the file via HTTP
                     console.log('Loading tutorial via HTTP fetch:', path);
@@ -2229,7 +2553,10 @@ class MarkdownBuddy {
                     }
                 }
             } catch (fileError) {
-                console.warn('Failed to load file, using sample content:', fileError);
+                console.error('Failed to load file with all methods:', fileError);
+                console.error('Error details:', fileError.message);
+                console.error('Original path:', path);
+                console.error('Falling back to sample content');
                 markdownContent = this.getSampleMarkdown(path);
             }
             

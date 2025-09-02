@@ -41,7 +41,7 @@ A modern, feature-rich desktop application for browsing and viewing markdown-bas
 
 ### 🧭 **Advanced Navigation System**
 
-- **🔍 Smart Search** - Real-time search with `Ctrl/Cmd+F` shortcut
+- **🔍 Smart Search** - Real-time toolbar search with `Ctrl/Cmd+F` shortcut and fallback tutorial data
 - **⬅️ Navigation History** - Previous button with smart history tracking and `Alt/Option+←` shortcut
 - **🔝 Scroll to Top** - Floating button and keyboard shortcuts (`Page Up`/`Home`) for instant top navigation
 - **⌨️ Full Keyboard Navigation** - Arrow keys, shortcuts, and accessibility support
@@ -69,6 +69,41 @@ A modern, feature-rich desktop application for browsing and viewing markdown-bas
 - **High Contrast** - Accessible color schemes
 - **Help System** - Interactive help with F1 key
 
+## 🆕 Recent Updates
+
+### September 2025 - UI/UX Enhancements & Search Improvements
+
+#### **🎨 Modern UI Redesign**
+
+- **Gradient Color Scheme** - Beautiful purple-to-blue gradient design system with CSS custom properties
+- **Enhanced Visual Hierarchy** - Improved typography, spacing, and component styling
+- **Smooth Animations** - Added elegant transitions and hover effects throughout the interface
+- **Responsive Design** - Better mobile and tablet optimization with touch-friendly interactions
+- **Welcome Screen Enhancement** - Added hero section with feature cards and step-by-step guidance
+
+#### **🔍 Search System Overhaul**
+
+- **Relocated Search Bar** - Moved from sidebar to prominent toolbar position for better visibility
+- **Enhanced Search Functionality** - Real-time search with comprehensive tutorial indexing
+- **Fallback Tutorial Data** - Added 14+ popular tutorials (Django, Flask, FastAPI, NeutralinoJS, etc.) for immediate search results
+- **Keyboard Navigation** - Arrow keys to navigate results, Enter to open tutorials
+- **Improved Search Results** - Better styling with highlighted matches and clear category paths
+- **Debug Enhancements** - Added extensive logging for troubleshooting and performance monitoring
+
+#### **🛠️ Technical Improvements**
+
+- **Path Resolution Fix** - Resolved tutorial loading issues by correcting file path formats
+- **Error Handling** - Enhanced error handling and debugging for file loading operations
+- **Code Cleanup** - Removed conflicting search systems and streamlined functionality
+- **Performance Optimization** - Improved search indexing and result rendering
+
+#### **📱 Mobile & Accessibility**
+
+- **Touch Optimization** - Enhanced touch targets and mobile-friendly interactions
+- **Responsive Search** - Search bar adapts to different screen sizes seamlessly
+- **Improved Focus Management** - Better keyboard navigation and focus indicators
+- **Enhanced ARIA Support** - Improved screen reader compatibility
+
 ## 📸 Screenshots
 
 ### Main Application Interface
@@ -87,7 +122,7 @@ Enhanced view showcasing the expandable navigation system, deep folder structure
 
 ![Smart Search Feature](screenshots/search.png)
 
-Real-time search with instant filtering, highlighted matches, and keyboard navigation support.
+Real-time toolbar search with instant filtering, highlighted matches, keyboard navigation support, and fallback tutorial data.
 
 ## 🚀 Installation
 
@@ -157,7 +192,7 @@ neu build
 - **Smart Content Layout** - Code blocks and tables utilize maximum available space
 - **Centered Content** - Text content remains readable while maximizing available space
 - **Width Resizing** - When visible, sidebar width can be adjusted and is automatically saved
-- **Search Box** - Type to filter tutorials; results list shows names and paths; Esc clears
+- **Navigation Tree** - Browse tutorials organized by category and subcategory
 - **Inline Actions** - Collapse/Expand/Refresh buttons at the top of navigation
 
 ### 🏠 Home Actions
@@ -168,7 +203,7 @@ neu build
 
 - **`F1`** - Show keyboard shortcuts help
 - **`Alt/Opt + ←`** - Navigate back to previous page
-- **`Ctrl/Cmd + F`** - Focus search box
+- **`Ctrl/Cmd + F`** - Focus toolbar search box
 - **`Ctrl/Cmd + H`** - Go to home
 - **`Ctrl/Cmd + T`** - Toggle always on top
 - **`Ctrl/Cmd + R`** - Refresh navigation
@@ -195,10 +230,12 @@ neu build
 
 ### 🔍 **Search Features**
 
-- **Real-time search** - Results appear as you type
-- **Path-based search** - Find files by name, folder, or path
-- **Highlighted matches** - Search terms highlighted in yellow
-- **Quick clear** - Click X or press Esc to clear
+- **Toolbar Location** - Prominently positioned in the center of the top toolbar for easy access
+- **Real-time search** - Results appear as you type with 14+ fallback tutorials available immediately
+- **Path-based search** - Find files by name, folder, or path with highlighted category information
+- **Highlighted matches** - Search terms highlighted in search results with category paths
+- **Keyboard Navigation** - Use arrow keys to navigate results, Enter to open tutorials
+- **Quick clear** - Click X or press Esc to clear search and hide results
 
 ### � **Navigation History & Previous Button**
 
