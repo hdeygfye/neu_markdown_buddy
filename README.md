@@ -155,7 +155,7 @@ bun install -g @neutralinojs/neu
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/codecaine-zz/neu_markdown_buddy.git
 cd neu_markdown_buddy
 
 # First-time setup: Download NeutralinoJS runtime binaries
