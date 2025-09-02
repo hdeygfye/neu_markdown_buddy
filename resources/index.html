@@ -36,8 +36,8 @@
     <div class="container">
         <!-- Sidebar Navigation -->
         <nav class="sidebar" id="sidebar">
-            <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Navigation Width">
-                <i class="fas fa-arrows-alt-h"></i>
+            <button class="sidebar-toggle" id="sidebarToggle" title="Hide/Show Navigation">
+                <i class="fas fa-times"></i>
             </button>
             <div class="sidebar-header">
                 <h2><i class="fas fa-book"></i> Markdown Buddy</h2>
@@ -54,6 +54,11 @@
             </div>
         </nav>
         
+        <!-- Floating sidebar toggle button (visible when sidebar is hidden) -->
+        <button class="floating-sidebar-toggle" id="floatingSidebarToggle" title="Show Navigation (Ctrl+B)">
+            <i class="fas fa-bars"></i>
+        </button>
+
         <!-- App Toolbar -->
         <header class="app-toolbar" id="appToolbar" aria-label="Application toolbar">
             <div class="toolbar-left">

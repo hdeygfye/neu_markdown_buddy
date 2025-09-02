@@ -51,7 +51,7 @@ A modern, feature-rich desktop application for browsing and viewing markdown-bas
 - **📋 Auto-Generated TOC** - Table of contents with smooth scrolling (always visible)
 - **🎨 Visual Feedback** - Smooth animations and modern UI interactions
 - **🧰 Toolbar with Labeled Actions** - Previous, Home, Collapse/Expand All, Refresh, Help, Pin, Theme, Zoom-/Zoom+
-- **📁 Sidebar Controls** - Width toggle/expand/collapse with saved width
+- **📁 Smart Sidebar Controls** - Complete hide/show toggle with floating button and full-width content expansion
 - **🎲 Random Tutorial (Home)** - One-click action to open a random tutorial from the library
 
 ### 🪟 **Window Management**
@@ -151,10 +151,14 @@ neu build
 
 ### 📚 Sidebar Controls
 
-- Width Toggle: Switch between normal and expanded width; persists exact width
-- Collapse Sidebar: Fully collapse to icon bar (Cmd/Ctrl+Shift+B)
-- Search Box: Type to filter tutorials; results list shows names and paths; Esc clears
-- Inline Actions: Collapse/Expand/Refresh buttons at the top of navigation
+- **Hide/Show Toggle** - Completely hide or show the sidebar with smooth transitions
+- **Floating Toggle Button** - When sidebar is hidden, a floating button appears for easy access back
+- **Full-Width Content** - Content expands to use the entire screen width when sidebar is hidden
+- **Smart Content Layout** - Code blocks and tables utilize maximum available space
+- **Centered Content** - Text content remains readable while maximizing available space
+- **Width Resizing** - When visible, sidebar width can be adjusted and is automatically saved
+- **Search Box** - Type to filter tutorials; results list shows names and paths; Esc clears
+- **Inline Actions** - Collapse/Expand/Refresh buttons at the top of navigation
 
 ### 🏠 Home Actions
 
@@ -168,8 +172,8 @@ neu build
 - **`Ctrl/Cmd + H`** - Go to home
 - **`Ctrl/Cmd + T`** - Toggle always on top
 - **`Ctrl/Cmd + R`** - Refresh navigation
-- **`Ctrl/Cmd + B`** - Toggle sidebar width (normal/expanded)
-- **`Ctrl/Cmd + Shift + B`** - Collapse sidebar
+- **`Ctrl/Cmd + B`** - Toggle sidebar visibility (hide/show)
+- **`Ctrl/Cmd + Shift + B`** - *(Removed - now uses simple hide/show toggle)*
 - **`Ctrl/Cmd + Q`** or **`Ctrl/Cmd + W`** - Quit the app
 - **`Esc`** - Clear search / Close dialogs
 - **`Page Up`** or **`Home`** - Scroll to top of current page
@@ -300,6 +304,16 @@ The application comes with comprehensive tutorial collections:
 - **YouTube API** - Video platform integration
 
 ## 🆕 Recent Enhancements
+
+### Enhanced Sidebar Navigation (September 2025)
+
+- **🎯 Complete Hide/Show Toggle** - Sidebar now completely hides instead of just collapsing to icons
+- **🔄 Floating Toggle Button** - Elegant floating button appears when sidebar is hidden for easy access
+- **📐 Full-Width Content Expansion** - Content automatically expands to use entire screen width
+- **🎨 Smart Content Layout** - Code blocks, tables, and text adapt to available screen space
+- **⌨️ Keyboard Control** - `Ctrl/Cmd + B` toggles sidebar visibility
+- **💾 State Persistence** - Remembers sidebar visibility preference between sessions
+- **📱 Mobile Responsive** - Floating button properly hidden on mobile devices
 
 ### Scroll-to-Top Feature (September 2025)
 

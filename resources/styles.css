@@ -1,10 +1,10 @@
 /* Reset and Base Styles */
 :root {
     --sidebar-width: 350px;
-    --sidebar-width-expanded: 500px;
-    --sidebar-width-collapsed: 60px;
     --toolbar-height: 56px;
     --content-zoom: 1;
+    --primary-color: #3498db;
+    --secondary-color: #2980b9;
 }
 * {
     margin: 0;
@@ -64,31 +64,58 @@ body {
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-/* Expanded state */
-.sidebar.expanded {
-    width: var(--sidebar-width-expanded);
-    max-width: 60vw;
+/* Hidden state */
+.sidebar.hidden {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
 }
 
-/* Collapsed state */
-.sidebar.collapsed {
-    width: var(--sidebar-width-collapsed);
-    min-width: var(--sidebar-width-collapsed);
+/* Floating sidebar toggle button (shown when sidebar is hidden) */
+.floating-sidebar-toggle {
+    position: fixed;
+    top: calc(var(--toolbar-height) + 10px);
+    left: 20px;
+    z-index: 1001; /* Higher than sidebar to ensure it's always clickable */
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    width: 48px;
+    height: 48px;
+    display: none; /* Hidden by default, shown when sidebar is hidden */
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    transition: all 0.2s ease;
 }
 
-.sidebar.collapsed .sidebar-header h2,
-.sidebar.collapsed .search-container,
-.sidebar.collapsed .nav-folder-text,
-.sidebar.collapsed .nav-file-text,
-.sidebar.collapsed .nav-folder-count {
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.2s, visibility 0.2s;
+.floating-sidebar-toggle:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
 }
 
-.sidebar.collapsed .nav-folder-icon,
-.sidebar.collapsed .nav-file-icon {
-    margin-right: 0;
+.floating-sidebar-toggle i {
+    font-size: 20px;
+}
+
+/* Show floating toggle when sidebar is hidden */
+.sidebar.hidden + .floating-sidebar-toggle {
+    display: flex !important;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Fade in animation for floating button */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 /* Resize handle */
@@ -1015,9 +1042,59 @@ body {
     transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Adjust main content based on sidebar state */
-.sidebar.expanded ~ .main-content { margin-left: var(--sidebar-width-expanded); }
-.sidebar.collapsed ~ .main-content { margin-left: var(--sidebar-width-collapsed); }
+/* Main content adjustments when sidebar is hidden */
+.sidebar.hidden ~ .main-content {
+    margin-left: 0;
+    max-width: 100%;
+    padding: calc(var(--toolbar-height) + 20px) 5% 40px 5%;
+}
+
+/* Better content expansion when sidebar is hidden */
+.sidebar.hidden ~ .main-content .markdown-content,
+.sidebar.hidden ~ .main-content .folder-contents,
+.sidebar.hidden ~ .main-content .welcome-content {
+    max-width: none;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* Code blocks expand to full width when sidebar is hidden */
+.sidebar.hidden ~ .main-content .markdown-content pre {
+    max-width: none;
+    width: 100%;
+}
+
+/* Tables expand better when sidebar is hidden */
+.sidebar.hidden ~ .main-content .markdown-content table {
+    width: 100%;
+    max-width: none;
+}
+
+/* Center content when sidebar is hidden but maintain readability */
+.sidebar.hidden ~ .main-content .markdown-content {
+    max-width: 1400px; /* Wider than default for better space usage */
+    margin: 0 auto;
+}
+
+/* Text should use more space but maintain readability */
+.sidebar.hidden ~ .main-content .markdown-content p,
+.sidebar.hidden ~ .main-content .markdown-content li {
+    max-width: 100ch; /* Wider reading width when more space available */
+}
+
+/* Code blocks and tables should use full available width */
+.sidebar.hidden ~ .main-content .markdown-content pre,
+.sidebar.hidden ~ .main-content .markdown-content table,
+.sidebar.hidden ~ .main-content .markdown-content .code-block {
+    max-width: none;
+    width: 100%;
+}
+
+/* Ensure feature grid uses more space when expanded */
+.sidebar.hidden ~ .main-content .features-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
 
 /* App Toolbar */
 .app-toolbar {
@@ -1036,8 +1113,11 @@ body {
     z-index: 900;
     transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.sidebar.expanded ~ .app-toolbar { left: var(--sidebar-width-expanded); }
-.sidebar.collapsed ~ .app-toolbar { left: var(--sidebar-width-collapsed); }
+
+/* App toolbar adjustments when sidebar is hidden */
+.sidebar.hidden ~ .floating-sidebar-toggle ~ .app-toolbar {
+    left: 0;
+}
 
 .toolbar-left, .toolbar-center, .toolbar-right { display: flex; align-items: center; gap: 8px; }
 .toolbar-group { display: flex; align-items: center; gap: 6px; }
@@ -1530,11 +1610,6 @@ body.theme-dark .home-stats .stat-label { color: #9ca3af; }
         order: -1;
     }
     
-    .sidebar.expanded,
-    .sidebar.collapsed {
-        width: 100% !important;
-    }
-    
     .sidebar-toggle {
         display: none; /* Hide toggle on mobile */
     }
@@ -1862,6 +1937,10 @@ body.theme-dark .scroll-to-top:hover {
         display: block;
     }
     
+    .floating-sidebar-toggle {
+        display: none !important; /* Hide floating toggle on mobile */
+    }
+    
     .sidebar {
         transform: translateX(-100%);
         transition: transform 0.3s ease;
@@ -1873,6 +1952,11 @@ body.theme-dark .scroll-to-top:hover {
     
     .main-content {
         margin-left: 0;
+        padding: 80px 20px 40px;
+    }
+    
+    /* Override expanded content styles on mobile */
+    .sidebar.hidden ~ .main-content {
         padding: 80px 20px 40px;
     }
     

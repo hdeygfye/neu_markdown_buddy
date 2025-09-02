@@ -12,7 +12,8 @@ class MarkdownBuddy {
             alwaysOnTop: false,
             theme: 'light',
             zoom: 1,
-            sidebarWidth: null
+            sidebarWidth: null,
+            sidebarState: 'visible' // Default to visible
         };
     this.isQuitting = false;
         this.init();
@@ -61,6 +62,11 @@ class MarkdownBuddy {
                 this.settings = { ...this.settings, ...JSON.parse(savedSettings) };
             }
             
+            // Migration: Convert old sidebar states to new system
+            if (this.settings.sidebarState === 'expanded' || this.settings.sidebarState === 'collapsed') {
+                this.settings.sidebarState = 'visible';
+            }
+            
             // Apply always-on-top setting if in window mode
             if (NL_MODE === "window" && this.settings.alwaysOnTop) {
                 await this.setAlwaysOnTop(true);
@@ -80,16 +86,21 @@ class MarkdownBuddy {
 
     applySidebarState() {
         const sidebar = document.getElementById('sidebar');
-        if (this.settings.sidebarState) {
-            sidebar.classList.toggle('expanded', this.settings.sidebarState === 'expanded');
-            sidebar.classList.toggle('collapsed', this.settings.sidebarState === 'collapsed');
+        const toggleIcon = document.querySelector('#sidebarToggle i');
+        
+        if (this.settings.sidebarState === 'hidden') {
+            sidebar.classList.add('hidden');
+            if (toggleIcon) toggleIcon.className = 'fas fa-bars';
+        } else {
+            sidebar.classList.remove('hidden');
+            if (toggleIcon) toggleIcon.className = 'fas fa-times';
         }
     }
 
     applySavedSidebarWidth() {
         const sidebar = document.getElementById('sidebar');
         if (!sidebar) return;
-        if (this.settings.sidebarWidth && !sidebar.classList.contains('collapsed')) {
+        if (this.settings.sidebarWidth && !sidebar.classList.contains('hidden')) {
             sidebar.style.width = this.settings.sidebarWidth + 'px';
             document.documentElement.style.setProperty('--sidebar-width', `${this.settings.sidebarWidth}px`);
         }
@@ -194,63 +205,24 @@ class MarkdownBuddy {
     }
 
     // Sidebar Navigation Controls
-    toggleSidebarWidth() {
+    toggleSidebarVisibility() {
         const sidebar = document.getElementById('sidebar');
         const toggleIcon = document.querySelector('#sidebarToggle i');
         
-        if (sidebar.classList.contains('expanded')) {
-            // From expanded to normal
-            sidebar.classList.remove('expanded');
-            this.settings.sidebarState = 'normal';
-            toggleIcon.className = 'fas fa-arrows-alt-h';
-            document.documentElement.style.setProperty('--sidebar-width', `${this.settings.sidebarWidth || sidebar.offsetWidth}px`);
-        } else if (sidebar.classList.contains('collapsed')) {
-            // From collapsed to normal
-            sidebar.classList.remove('collapsed');
-            this.settings.sidebarState = 'normal';
-            toggleIcon.className = 'fas fa-arrows-alt-h';
-            document.documentElement.style.setProperty('--sidebar-width', `${this.settings.sidebarWidth || 350}px`);
+        if (sidebar.classList.contains('hidden')) {
+            // Show sidebar
+            sidebar.classList.remove('hidden');
+            toggleIcon.className = 'fas fa-times';
+            this.settings.sidebarState = 'visible';
         } else {
-            // From normal to expanded
-            sidebar.classList.add('expanded');
-            this.settings.sidebarState = 'expanded';
-            toggleIcon.className = 'fas fa-compress-alt';
-            document.documentElement.style.setProperty('--sidebar-width', `${sidebar.offsetWidth}px`);
+            // Hide sidebar
+            sidebar.classList.add('hidden');
+            toggleIcon.className = 'fas fa-bars';
+            this.settings.sidebarState = 'hidden';
         }
-        
-        // Refresh navigation to update text truncation
-        setTimeout(() => this.refreshTextDisplay(), 100);
         
         this.saveSettings();
         this.showNotification(`Navigation ${this.settings.sidebarState}`, false, 1500);
-    }
-
-    refreshTextDisplay() {
-        // Re-render navigation items to update text truncation
-        const navItems = document.querySelectorAll('.nav-folder-text, .nav-file-text');
-        navItems.forEach(item => {
-            const level = parseInt(item.closest('[data-level]')?.getAttribute('data-level') || '0');
-            const originalText = item.getAttribute('title') || item.textContent;
-            if (originalText && originalText.endsWith('...')) {
-                // Extract original text from title attribute
-                const fullText = item.getAttribute('title') || item.textContent;
-                item.textContent = this.truncateText(fullText, level);
-            }
-        });
-    }
-
-    collapseSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const toggleIcon = document.querySelector('#sidebarToggle i');
-        
-        sidebar.classList.remove('expanded');
-        sidebar.classList.add('collapsed');
-        this.settings.sidebarState = 'collapsed';
-        toggleIcon.className = 'fas fa-expand-alt';
-    document.documentElement.style.setProperty('--sidebar-width', getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width-collapsed'));
-        
-        this.saveSettings();
-        this.showNotification('Navigation collapsed', false, 1500);
     }
 
     updateTrayMenu() {
@@ -380,7 +352,15 @@ class MarkdownBuddy {
         const sidebarToggle = document.getElementById('sidebarToggle');
         if (sidebarToggle) {
             sidebarToggle.addEventListener('click', () => {
-                this.toggleSidebarWidth();
+                this.toggleSidebarVisibility();
+            });
+        }
+
+        // Add event listener for floating sidebar toggle
+        const floatingSidebarToggle = document.getElementById('floatingSidebarToggle');
+        if (floatingSidebarToggle) {
+            floatingSidebarToggle.addEventListener('click', () => {
+                this.toggleSidebarVisibility();
             });
         }
 
@@ -466,14 +446,7 @@ class MarkdownBuddy {
             // Sidebar navigation shortcuts
             if ((event.metaKey || event.ctrlKey) && event.key === 'b') {
                 event.preventDefault();
-                this.toggleSidebarWidth();
-                return;
-            }
-
-            // Collapse sidebar shortcut
-            if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key === 'B') {
-                event.preventDefault();
-                this.collapseSidebar();
+                this.toggleSidebarVisibility();
                 return;
             }
 
