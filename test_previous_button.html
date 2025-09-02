@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Previous Button</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { padding: 10px 20px; margin: 10px; font-size: 16px; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        #status { margin: 20px 0; padding: 10px; background: #f0f0f0; }
+        .history-item { background: #e8f4f8; margin: 5px 0; padding: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Previous Button Test</h1>
+    
+    <div>
+        <button id="appPreviousBtn" disabled>Previous</button>
+        <button onclick="simulateNavigate('page1', 'Page 1')">Navigate to Page 1</button>
+        <button onclick="simulateNavigate('page2', 'Page 2')">Navigate to Page 2</button>
+        <button onclick="simulateNavigate('page3', 'Page 3')">Navigate to Page 3</button>
+        <button onclick="showHome()">Home</button>
+    </div>
+    
+    <div id="status">
+        <strong>Current Path:</strong> <span id="currentPath">""</span><br>
+        <strong>History Length:</strong> <span id="historyLength">0</span>
+    </div>
+    
+    <div>
+        <h3>Navigation History:</h3>
+        <div id="historyDisplay"></div>
+    </div>
+    
+    <div>
+        <h3>Current Content:</h3>
+        <div id="content">Home Page</div>
+    </div>
+
+    <script>
+        // Simplified version of the navigation logic for testing
+        class TestApp {
+            constructor() {
+                this.currentPath = '';
+                this.navigationHistory = [];
+                this.isNavigatingBack = false;
+                this.setupEventListeners();
+                this.updatePreviousButton();
+            }
+            
+            setupEventListeners() {
+                document.getElementById('appPreviousBtn').addEventListener('click', () => this.goBack());
+            }
+            
+            addToNavigationHistory(entry) {
+                if (this.isNavigatingBack || !entry.path) {
+                    console.log('Skipping history add:', entry);
+                    return;
+                }
+                
+                if (this.navigationHistory.length > 0 && 
+                    this.navigationHistory[this.navigationHistory.length - 1].path === entry.path) {
+                    console.log('Skipping duplicate:', entry);
+                    return;
+                }
+                
+                console.log('Adding to navigation history:', entry);
+                this.navigationHistory.push(entry);
+                
+                if (this.navigationHistory.length > 50) {
+                    this.navigationHistory.shift();
+                }
+                
+                this.updatePreviousButton();
+                this.updateDisplay();
+            }
+            
+            updatePreviousButton() {
+                const previousBtn = document.getElementById('appPreviousBtn');
+                const canGoBack = this.navigationHistory.length > 0;
+                previousBtn.disabled = !canGoBack;
+                
+                if (canGoBack) {
+                    const lastEntry = this.navigationHistory[this.navigationHistory.length - 1];
+                    previousBtn.title = `Go back to: ${lastEntry.title}`;
+                } else {
+                    previousBtn.title = 'No previous page';
+                }
+            }
+            
+            goBack() {
+                if (this.navigationHistory.length === 0) {
+                    console.log('No navigation history available');
+                    return;
+                }
+                
+                this.isNavigatingBack = true;
+                const previousEntry = this.navigationHistory.pop();
+                console.log('Navigating back to:', previousEntry);
+                
+                // Simulate navigation
+                this.currentPath = previousEntry.path;
+                document.getElementById('content').innerHTML = `Content for: ${previousEntry.title}`;
+                
+                setTimeout(() => {
+                    this.isNavigatingBack = false;
+                    this.updatePreviousButton();
+                    this.updateDisplay();
+                }, 100);
+            }
+            
+            navigate(path, title) {
+                if (!this.isNavigatingBack && this.currentPath !== path && this.currentPath !== '') {
+                    this.addToNavigationHistory({
+                        path: this.currentPath,
+                        title: document.getElementById('content').innerHTML || 'Previous Page',
+                        type: 'page'
+                    });
+                }
+                
+                this.currentPath = path;
+                document.getElementById('content').innerHTML = `Content for: ${title}`;
+                this.updateDisplay();
+            }
+            
+            showHome() {
+                if (!this.isNavigatingBack && this.currentPath) {
+                    this.addToNavigationHistory({
+                        path: this.currentPath,
+                        title: document.getElementById('content').innerHTML || 'Previous Page',
+                        type: 'page'
+                    });
+                }
+                
+                this.currentPath = '';
+                document.getElementById('content').innerHTML = 'Home Page';
+                this.updateDisplay();
+            }
+            
+            updateDisplay() {
+                document.getElementById('currentPath').textContent = `"${this.currentPath}"`;
+                document.getElementById('historyLength').textContent = this.navigationHistory.length;
+                
+                const historyDisplay = document.getElementById('historyDisplay');
+                historyDisplay.innerHTML = this.navigationHistory.map((item, index) => 
+                    `<div class="history-item">${index + 1}. ${item.title} (${item.path})</div>`
+                ).join('');
+            }
+        }
+        
+        const app = new TestApp();
+        
+        function simulateNavigate(path, title) {
+            app.navigate(path, title);
+        }
+        
+        function showHome() {
+            app.showHome();
+        }
+    </script>
+</body>
+</html>

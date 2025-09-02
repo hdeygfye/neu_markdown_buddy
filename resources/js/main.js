@@ -6,6 +6,8 @@ class MarkdownBuddy {
         this.currentPath = '';
         this.tutorialsDir = '';
         this.navigationData = {};
+        this.navigationHistory = []; // Track navigation history for back button
+        this.isNavigatingBack = false; // Flag to prevent history tracking during back navigation
         this.settings = {
             alwaysOnTop: false,
             theme: 'light',
@@ -288,6 +290,9 @@ class MarkdownBuddy {
         
         // Show welcome content
         this.showWelcomeContent();
+        
+        // Initialize previous button state
+        this.updatePreviousButton();
     }
 
     setupEventListeners() {
@@ -355,6 +360,7 @@ class MarkdownBuddy {
 
         // Toolbar actions
         const byId = (id) => document.getElementById(id);
+        byId('appPreviousBtn')?.addEventListener('click', () => this.goBack());
         byId('appHomeBtn')?.addEventListener('click', () => this.showWelcomeContent());
     byId('appCollapseAllBtn')?.addEventListener('click', (e) => this._withBusyIcon(e.currentTarget, 'fa-compress-arrows-alt', () => this.collapseAllFolders()));
     byId('appExpandAllBtn')?.addEventListener('click', (e) => this._withBusyIcon(e.currentTarget, 'fa-expand-arrows-alt', () => this.expandAllFolders()));
@@ -460,6 +466,13 @@ class MarkdownBuddy {
             if (event.key === 'F1' || ((event.metaKey || event.ctrlKey) && event.key === '?')) {
                 event.preventDefault();
                 this.showKeyboardHelp();
+                return;
+            }
+
+            // Previous/Back shortcut (Alt/Option + Left Arrow)
+            if (event.altKey && event.key === 'ArrowLeft') {
+                event.preventDefault();
+                this.goBack();
                 return;
             }
 
@@ -1991,6 +2004,19 @@ class MarkdownBuddy {
         // Navigate to folder contents view
         console.log('Showing folder contents for:', path);
         
+        // Track navigation history if not navigating back and path is different
+        if (!this.isNavigatingBack && this.currentPath !== path && this.currentPath !== '') {
+            const currentTitle = document.querySelector('.tutorial-title')?.textContent || 
+                               document.querySelector('.folder-title')?.textContent || 'Home';
+            const currentType = this.determineCurrentPageType();
+            
+            this.addToNavigationHistory({
+                path: this.currentPath,
+                title: currentTitle,
+                type: currentType
+            });
+        }
+        
         const mainContent = document.getElementById('main-content');
         const breadcrumb = this.createBreadcrumb(path);
         
@@ -2098,6 +2124,19 @@ class MarkdownBuddy {
     async loadTutorial(path, title) {
         const mainContent = document.getElementById('main-content');
         
+        // Track navigation history if we're not going back and path is different
+        if (!this.isNavigatingBack && this.currentPath !== path && this.currentPath !== '') {
+            const currentTitle = document.querySelector('.tutorial-title')?.textContent || 
+                                document.querySelector('.folder-title')?.textContent || 'Previous Page';
+            const currentType = this.determineCurrentPageType();
+            
+            this.addToNavigationHistory({
+                path: this.currentPath,
+                title: currentTitle,
+                type: currentType
+            });
+        }
+        
         try {
             // Show loading state
             mainContent.innerHTML = `
@@ -2158,14 +2197,11 @@ class MarkdownBuddy {
                                 <button class="btn-secondary" onclick="markdownBuddy.showWelcomeContent()" title="Go to home">
                                     <i class="fas fa-home"></i> Home
                                 </button>
-                                <button class="btn-secondary" onclick="markdownBuddy.toggleTableOfContents()" title="Toggle table of contents" id="tocToggle">
-                                    <i class="fas fa-list"></i> Contents
-                                </button>
                             </div>
                         </div>
                     </div>
                     <div class="tutorial-body">
-                        <div class="table-of-contents" id="tableOfContents" style="display: none;">
+                        <div class="table-of-contents" id="tableOfContents">
                             <h3><i class="fas fa-list"></i> Table of Contents</h3>
                             <div class="toc-content"></div>
                         </div>
@@ -2329,23 +2365,106 @@ class MarkdownBuddy {
         });
     }
 
-    toggleTableOfContents() {
-        const toc = document.getElementById('tableOfContents');
-        const toggle = document.getElementById('tocToggle');
-        
-        if (!toc || !toggle) return;
-        
-        const isVisible = toc.style.display !== 'none';
-        
-        if (isVisible) {
-            toc.style.display = 'none';
-            toggle.innerHTML = '<i class="fas fa-list"></i> Contents';
-            toggle.title = 'Show table of contents';
-        } else {
-            toc.style.display = 'block';
-            toggle.innerHTML = '<i class="fas fa-list-ul"></i> Hide Contents';
-            toggle.title = 'Hide table of contents';
+    // Navigation History Management
+    addToNavigationHistory(entry) {
+        // Don't add during back navigation or if entry is invalid
+        if (this.isNavigatingBack || !entry.path) {
+            return;
         }
+        
+        // Don't add duplicates
+        if (this.navigationHistory.length > 0 && 
+            this.navigationHistory[this.navigationHistory.length - 1].path === entry.path) {
+            return;
+        }
+        
+        console.log('Adding to navigation history:', entry);
+        
+        // Add to history
+        this.navigationHistory.push(entry);
+        
+        // Keep history limited to 50 entries
+        if (this.navigationHistory.length > 50) {
+            this.navigationHistory.shift();
+        }
+        
+        // Update previous button state
+        this.updatePreviousButton();
+    }
+    
+    updatePreviousButton() {
+        const previousBtn = document.getElementById('appPreviousBtn');
+        if (previousBtn) {
+            const canGoBack = this.navigationHistory.length > 0;
+            previousBtn.disabled = !canGoBack;
+            
+            console.log('Updating previous button - history length:', this.navigationHistory.length, 'canGoBack:', canGoBack);
+            
+            if (canGoBack) {
+                const lastEntry = this.navigationHistory[this.navigationHistory.length - 1];
+                previousBtn.title = `Go back to: ${lastEntry.title}`;
+                console.log('Previous button enabled - last entry:', lastEntry);
+            } else {
+                previousBtn.title = 'No previous page';
+                console.log('Previous button disabled - no history');
+            }
+        } else {
+            console.warn('Previous button not found in DOM');
+        }
+    }
+    
+    goBack() {
+        if (this.navigationHistory.length === 0) {
+            console.log('No navigation history available');
+            return;
+        }
+        
+        // Set flag to prevent adding to history during back navigation
+        this.isNavigatingBack = true;
+        
+        // Get the last entry from history
+        const previousEntry = this.navigationHistory.pop();
+        console.log('Navigating back to:', previousEntry);
+        
+        // Navigate to the previous page
+        if (previousEntry.type === 'home' || !previousEntry.path) {
+            this.showWelcomeContent();
+        } else if (previousEntry.type === 'folder') {
+            // Extract folder name from path
+            const folderName = previousEntry.title;
+            this.showFolderContents(previousEntry.path, folderName);
+        } else {
+            // It's a tutorial
+            this.loadTutorial(previousEntry.path, previousEntry.title);
+        }
+        
+        // Reset flag after a short delay to ensure navigation is complete
+        setTimeout(() => {
+            this.isNavigatingBack = false;
+            this.updatePreviousButton();
+        }, 100);
+    }
+    
+    determineCurrentPageType() {
+        // Determine the type of the current page based on DOM elements and path
+        if (!this.currentPath) {
+            return 'home';
+        }
+        
+        if (document.querySelector('.tutorial-title')) {
+            return 'tutorial';
+        }
+        
+        if (document.querySelector('.folder-title')) {
+            return 'folder';
+        }
+        
+        // Fallback to path-based detection
+        if (this.currentPath.includes('.md')) {
+            return 'tutorial';
+        }
+        
+        return 'folder';
     }
 
     createBreadcrumb(path) {
@@ -2635,6 +2754,19 @@ class MarkdownBuddy {
 
     showWelcomeContent() {
         console.log('Showing home/welcome content');
+        
+        // Track navigation history if not already at home and not navigating back
+        if (!this.isNavigatingBack && this.currentPath) {
+            const currentTitle = document.querySelector('.tutorial-title')?.textContent || 
+                               document.querySelector('.folder-title')?.textContent || 'Previous Page';
+            const currentType = this.determineCurrentPageType();
+            
+            this.addToNavigationHistory({
+                path: this.currentPath,
+                title: currentTitle,
+                type: currentType
+            });
+        }
         
         // Clear current path
         this.currentPath = '';

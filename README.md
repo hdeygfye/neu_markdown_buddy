@@ -16,7 +16,7 @@ A modern, feature-rich desktop application for browsing and viewing markdown-bas
 ### 🎨 **Rich Content Display**
 
 - **Advanced Syntax Highlighting** - Code blocks highlighted with Highlight.js for 20+ languages
-- **Auto-Generated Table of Contents** - Navigate through document sections easily
+- **Auto-Generated Table of Contents** - Navigate through document sections easily (always visible)
 - **One-Click Code Copying** - Copy any code block with a single click
 - **Smooth Anchor Navigation** - Jump to sections with smooth scrolling
 - **Responsive Design** - Optimized for desktop and mobile displays
@@ -26,13 +26,14 @@ A modern, feature-rich desktop application for browsing and viewing markdown-bas
 ### 🧭 **Advanced Navigation System**
 
 - **🔍 Smart Search** - Real-time search with `Ctrl/Cmd+F` shortcut
+- **⬅️ Navigation History** - Previous button with smart history tracking and `Alt/Option+←` shortcut
 - **⌨️ Full Keyboard Navigation** - Arrow keys, shortcuts, and accessibility support
 - **🎯 Context Menus** - Right-click for additional actions
 - **📱 Touch-Optimized** - Mobile-friendly navigation with proper touch targets
 - **🎛️ Persistent State** - Remembers folder states and preferences
-- **📋 Auto-Generated TOC** - Table of contents with smooth scrolling
+- **📋 Auto-Generated TOC** - Table of contents with smooth scrolling (always visible)
 - **🎨 Visual Feedback** - Smooth animations and modern UI interactions
-- **🧰 Toolbar with Labeled Actions** - Home, Collapse/Expand All, Refresh, Help, Pin, Theme, Zoom-/Zoom+
+- **🧰 Toolbar with Labeled Actions** - Previous, Home, Collapse/Expand All, Refresh, Help, Pin, Theme, Zoom-/Zoom+
 - **📁 Sidebar Controls** - Width toggle/expand/collapse with saved width
 - **🎲 Random Tutorial (Home)** - One-click action to open a random tutorial from the library
 
@@ -121,6 +122,7 @@ neu build
 
 ### 🧰 Toolbar & UI Controls
 
+- Previous: Navigate back to the previously viewed page/section (disabled when no history)
 - Home: Go to the welcome page
 - Collapse All: Collapse all folders (shows a brief busy spinner)
 - Expand All: Expand all folders (shows a brief busy spinner)
@@ -144,6 +146,7 @@ neu build
 ### 🔥 **Quick Start Shortcuts**
 
 - **`F1`** - Show keyboard shortcuts help
+- **`Alt/Opt + ←`** - Navigate back to previous page
 - **`Ctrl/Cmd + F`** - Focus search box
 - **`Ctrl/Cmd + H`** - Go to home
 - **`Ctrl/Cmd + T`** - Toggle always on top
@@ -174,12 +177,21 @@ neu build
 - **Highlighted matches** - Search terms highlighted in yellow
 - **Quick clear** - Click X or press Esc to clear
 
-### 📋 **Table of Contents**
+### � **Navigation History & Previous Button**
+
+- **Smart History Tracking** - Automatically tracks your browsing history across tutorials, folders, and home
+- **Previous Button** - Navigate back to previously viewed pages with a single click
+- **Keyboard Shortcut** - Use `Alt/Option + Left Arrow` to go back quickly
+- **Visual Feedback** - Button shows disabled state when no history is available
+- **Dynamic Tooltips** - Hover to see where the Previous button will take you
+- **Cross-Section Navigation** - Works seamlessly between tutorials, folder views, and home page
+
+### �📋 **Table of Contents**
 
 - **Auto-generated** - Created from markdown headers
+- **Always visible** - Automatically displayed for all tutorials (no toggle needed)
 - **Color-coded levels** - Different colors for H1-H6
 - **Smooth scrolling** - Click to jump to sections
-- **Toggle visibility** - Show/hide with button
 
 ### 🧠 Persistence & Settings
 
