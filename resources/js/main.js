@@ -1164,20 +1164,27 @@ class MarkdownBuddy {
             if (allTutorials.length === 0) {
                 console.log('Adding fallback tutorial data...');
                 allTutorials = [
+                    // Google Scripts tutorials
+                    { name: 'Gmail Functions', path: 'resources/tutorials/google scripts/google-apps-script-gmail-functions.md', displayPath: 'Google Scripts › Gmail', fullPath: 'resources/tutorials/google scripts/google-apps-script-gmail-functions.md' },
+                    { name: 'Google Docs', path: 'resources/tutorials/google scripts/google-apps-script-google-docs.md', displayPath: 'Google Scripts › Docs', fullPath: 'resources/tutorials/google scripts/google-apps-script-google-docs.md' },
+                    { name: 'Google Drive', path: 'resources/tutorials/google scripts/google-apps-script-google-drive.md', displayPath: 'Google Scripts › Drive', fullPath: 'resources/tutorials/google scripts/google-apps-script-google-drive.md' },
+                    { name: 'Google Sheets', path: 'resources/tutorials/google scripts/google-apps-script-google-sheets.md', displayPath: 'Google Scripts › Sheets', fullPath: 'resources/tutorials/google scripts/google-apps-script-google-sheets.md' },
+                    { name: 'YouTube API', path: 'resources/tutorials/google scripts/google-apps-script-youtube-api.md', displayPath: 'Google Scripts › YouTube', fullPath: 'resources/tutorials/google scripts/google-apps-script-youtube-api.md' },
+                    // Python tutorials
                     { name: 'Django', path: 'resources/tutorials/python/pip/django.md', displayPath: 'Python › Django', fullPath: 'resources/tutorials/python/pip/django.md' },
                     { name: 'Flask', path: 'resources/tutorials/python/pip/flask.md', displayPath: 'Python › Flask', fullPath: 'resources/tutorials/python/pip/flask.md' },
                     { name: 'FastAPI', path: 'resources/tutorials/python/pip/fastapi.md', displayPath: 'Python › FastAPI', fullPath: 'resources/tutorials/python/pip/fastapi.md' },
-                    { name: 'Express BUN Redis', path: 'resources/tutorials/javascript/npm/express-bun-redis.md', displayPath: 'JavaScript › Express BUN Redis', fullPath: 'resources/tutorials/javascript/npm/express-bun-redis.md' },
-                    { name: 'Express BUN SQLite', path: 'resources/tutorials/javascript/npm/express-bun-sqlite.md', displayPath: 'JavaScript › Express BUN SQLite', fullPath: 'resources/tutorials/javascript/npm/express-bun-sqlite.md' },
-                    { name: 'NeutralinoJS', path: 'resources/tutorials/javascript/npm/neutralinojs.md', displayPath: 'JavaScript › NeutralinoJS', fullPath: 'resources/tutorials/javascript/npm/neutralinojs.md' },
                     { name: 'NumPy', path: 'resources/tutorials/python/pip/numpy.md', displayPath: 'Python › NumPy', fullPath: 'resources/tutorials/python/pip/numpy.md' },
                     { name: 'Pandas', path: 'resources/tutorials/python/pip/pandas.md', displayPath: 'Python › Pandas', fullPath: 'resources/tutorials/python/pip/pandas.md' },
                     { name: 'Matplotlib', path: 'resources/tutorials/python/pip/matplotlib.md', displayPath: 'Python › Matplotlib', fullPath: 'resources/tutorials/python/pip/matplotlib.md' },
+                    // JavaScript tutorials
+                    { name: 'Express BUN Redis', path: 'resources/tutorials/javascript/npm/express-bun-redis.md', displayPath: 'JavaScript › Express BUN Redis', fullPath: 'resources/tutorials/javascript/npm/express-bun-redis.md' },
+                    { name: 'Express BUN SQLite', path: 'resources/tutorials/javascript/npm/express-bun-sqlite.md', displayPath: 'JavaScript › Express BUN SQLite', fullPath: 'resources/tutorials/javascript/npm/express-bun-sqlite.md' },
+                    { name: 'NeutralinoJS', path: 'resources/tutorials/javascript/npm/neutralinojs.md', displayPath: 'JavaScript › NeutralinoJS', fullPath: 'resources/tutorials/javascript/npm/neutralinojs.md' },
+                    // Homebrew tutorials
                     { name: 'Docker', path: 'resources/tutorials/homebrew/development-tools/docker.md', displayPath: 'Homebrew › Docker', fullPath: 'resources/tutorials/homebrew/development-tools/docker.md' },
                     { name: 'Git', path: 'resources/tutorials/homebrew/development-tools/git.md', displayPath: 'Homebrew › Git', fullPath: 'resources/tutorials/homebrew/development-tools/git.md' },
-                    { name: 'Terminal', path: 'resources/tutorials/homebrew/system-guides/terminal.md', displayPath: 'Homebrew › Terminal', fullPath: 'resources/tutorials/homebrew/system-guides/terminal.md' },
-                    { name: 'Google Apps Script Gmail Functions', path: 'resources/tutorials/google scripts/google-apps-script-gmail-functions.md', displayPath: 'Google Scripts › Gmail', fullPath: 'resources/tutorials/google scripts/google-apps-script-gmail-functions.md' },
-                    { name: 'Google Apps Script Google Sheets', path: 'resources/tutorials/google scripts/google-apps-script-google-sheets.md', displayPath: 'Google Scripts › Sheets', fullPath: 'resources/tutorials/google scripts/google-apps-script-google-sheets.md' }
+                    { name: 'Terminal', path: 'resources/tutorials/homebrew/system-guides/terminal.md', displayPath: 'Homebrew › Terminal', fullPath: 'resources/tutorials/homebrew/system-guides/terminal.md' }
                 ];
                 console.log('Added fallback tutorials:', allTutorials.length);
             }
@@ -1339,6 +1346,13 @@ class MarkdownBuddy {
                 console.log('Navigation data not ready, adding real fallback tutorials...');
                 // Add real tutorials that exist in the project for immediate search functionality
                 allTutorials = [
+                    // Google Scripts tutorials
+                    { name: 'Gmail Functions', displayPath: 'Google Scripts', fullPath: 'resources/tutorials/google scripts/google-apps-script-gmail-functions.md' },
+                    { name: 'Google Docs', displayPath: 'Google Scripts', fullPath: 'resources/tutorials/google scripts/google-apps-script-google-docs.md' },
+                    { name: 'Google Drive', displayPath: 'Google Scripts', fullPath: 'resources/tutorials/google scripts/google-apps-script-google-drive.md' },
+                    { name: 'Google Sheets', displayPath: 'Google Scripts', fullPath: 'resources/tutorials/google scripts/google-apps-script-google-sheets.md' },
+                    { name: 'YouTube API', displayPath: 'Google Scripts', fullPath: 'resources/tutorials/google scripts/google-apps-script-youtube-api.md' },
+                    // Python tutorials
                     { name: 'Django', displayPath: 'Python › Pip', fullPath: 'resources/tutorials/python/pip/django.md' },
                     { name: 'Flask', displayPath: 'Python › Pip', fullPath: 'resources/tutorials/python/pip/flask.md' },
                     { name: 'FastAPI', displayPath: 'Python › Pip', fullPath: 'resources/tutorials/python/pip/fastapi.md' },
@@ -1347,9 +1361,11 @@ class MarkdownBuddy {
                     { name: 'Matplotlib', displayPath: 'Python › Pip', fullPath: 'resources/tutorials/python/pip/matplotlib.md' },
                     { name: 'PyGame', displayPath: 'Python › Pip', fullPath: 'resources/tutorials/python/pip/pygame.md' },
                     { name: 'Redis', displayPath: 'Python › Pip', fullPath: 'resources/tutorials/python/pip/redis.md' },
+                    // JavaScript tutorials
                     { name: 'Express Bun SQLite', displayPath: 'JavaScript › NPM', fullPath: 'resources/tutorials/javascript/npm/express-bun-sqlite.md' },
                     { name: 'Express Bun Redis', displayPath: 'JavaScript › NPM', fullPath: 'resources/tutorials/javascript/npm/express-bun-redis.md' },
                     { name: 'NeutralinoJS', displayPath: 'JavaScript › NPM', fullPath: 'resources/tutorials/javascript/npm/neutralinojs.md' },
+                    // Homebrew tutorials
                     { name: 'Git', displayPath: 'Homebrew › Development Tools', fullPath: 'resources/tutorials/homebrew/development-tools/git.md' },
                     { name: 'Docker', displayPath: 'Homebrew › Development Tools', fullPath: 'resources/tutorials/homebrew/development-tools/docker.md' },
                     { name: 'FFmpeg', displayPath: 'Homebrew › Development Tools', fullPath: 'resources/tutorials/homebrew/development-tools/ffmpeg.md' }
