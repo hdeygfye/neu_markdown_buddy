@@ -134,6 +134,32 @@ class MarkdownBuddy {
         this.saveSettings();
     }
 
+    scrollToTop() {
+        const startPosition = window.pageYOffset;
+        if (startPosition <= 0) return; // Already at top
+        
+        const startTime = performance.now();
+        const duration = 500; // Animation duration in ms
+
+        const easeInOutCubic = (t) => {
+            return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+        };
+
+        const animateScroll = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easeProgress = easeInOutCubic(progress);
+            
+            window.scrollTo(0, startPosition * (1 - easeProgress));
+            
+            if (progress < 1) {
+                requestAnimationFrame(animateScroll);
+            }
+        };
+
+        requestAnimationFrame(animateScroll);
+    }
+
     async setAlwaysOnTop(alwaysOnTop) {
         try {
             if (NL_MODE === "window") {
@@ -371,6 +397,9 @@ class MarkdownBuddy {
         byId('appZoomInBtn')?.addEventListener('click', () => this.changeZoom(0.1));
     byId('appZoomOutBtn')?.addEventListener('click', () => this.changeZoom(-0.1));
 
+        // Setup scroll to top button
+        this.setupScrollToTop();
+
         // Observe sidebar width changes to keep CSS var in sync and persist
         const sidebar = document.getElementById('sidebar');
         if (sidebar && !this._sidebarResizeObserver) {
@@ -497,6 +526,15 @@ class MarkdownBuddy {
                 return;
             }
 
+            // Scroll to top shortcut (Page Up key or Home key)
+            if (event.key === 'PageUp' || event.key === 'Home') {
+                if (!event.target.matches('input, textarea, [contenteditable]')) {
+                    event.preventDefault();
+                    this.scrollToTop();
+                    return;
+                }
+            }
+
             // Navigation with arrow keys
             if (event.target.classList.contains('nav-file') || event.target.classList.contains('nav-folder')) {
                 this.handleArrowKeyNavigation(event);
@@ -547,6 +585,10 @@ class MarkdownBuddy {
                             <div class="help-shortcut">
                                 <kbd>Enter</kbd> / <kbd>Space</kbd>
                                 <span>Open selected item</span>
+                            </div>
+                            <div class="help-shortcut">
+                                <kbd>Page Up</kbd> / <kbd>Home</kbd>
+                                <span>Scroll to top</span>
                             </div>
                         </div>
                     </div>
@@ -1033,6 +1075,52 @@ class MarkdownBuddy {
         document.addEventListener('dragend', (event) => {
             event.target.classList.remove('dragging');
         });
+    }
+
+    setupScrollToTop() {
+        const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+        if (!scrollToTopBtn) return;
+
+        let scrollTimeout = null;
+        let isVisible = false;
+        
+        // Show/hide button based on scroll position
+        const toggleScrollButton = () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const threshold = 300; // Show button after scrolling 300px
+            const shouldBeVisible = scrollTop > threshold;
+            
+            if (shouldBeVisible !== isVisible) {
+                isVisible = shouldBeVisible;
+                if (isVisible) {
+                    scrollToTopBtn.classList.add('visible');
+                } else {
+                    scrollToTopBtn.classList.remove('visible');
+                }
+            }
+        };
+
+        // Throttled scroll handler
+        const throttledScrollHandler = () => {
+            if (scrollTimeout) return;
+            
+            scrollTimeout = setTimeout(() => {
+                toggleScrollButton();
+                scrollTimeout = null;
+            }, 100);
+        };
+
+        // Smooth scroll to top function  
+        const scrollToTopHandler = () => {
+            this.scrollToTop();
+        };
+
+        // Event listeners
+        scrollToTopBtn.addEventListener('click', scrollToTopHandler);
+        window.addEventListener('scroll', throttledScrollHandler, { passive: true });
+        
+        // Initial check
+        toggleScrollButton();
     }
 
     setupTrayMenu() {

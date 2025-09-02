@@ -1,6 +1,22 @@
 # Markdown Buddy - Advanced NeutralinoJS Tutorial Browser
 
-A modern, feature-rich desktop application for browsing and viewing markdown-based tutorials with advanced navigation, syntax highlighting, and responsive design. This is an enhanced NeutralinoJS port of the original PHP-based [markdown_tutorials](https://github.com/codecaine-zz/markdown_tutorials) application.
+A modern, feature-rich desktop application for browsing and viewing markdown-based tutorials with advanced navigation, syntax highl### 📋 **Table of Contents**
+
+- **Auto-generated** - Created from markdown headers
+- **Always visible** - Automatically displayed for all tutorials (no toggle needed)
+- **Color-coded levels** - Different colors for H1-H6
+- **Smooth scrolling** - Click to jump to sections
+
+### 🔝 **Scroll to Top Feature**
+
+- **Floating Button** - Elegant circular button appears after scrolling 300px down
+- **Smart Visibility** - Auto-shows/hides based on scroll position with smooth animations
+- **Keyboard Shortcuts** - `Page Up` or `Home` keys for instant top navigation
+- **Smooth Animation** - 500ms cubic-bezier easing for natural scroll motion
+- **Theme Integration** - Blue (light) / Purple (dark) colors matching app theme
+- **Mobile Optimized** - Responsive sizing and touch-friendly interactions
+- **Accessibility** - ARIA labels and keyboard navigation support
+- **Performance** - Throttled scroll detection for optimal performanceg, and responsive design. This is an enhanced NeutralinoJS port of the original PHP-based [markdown_tutorials](https://github.com/codecaine-zz/markdown_tutorials) application.
 
 ![Markdown Buddy Screenshot](screenshots/main.png)
 
@@ -27,6 +43,7 @@ A modern, feature-rich desktop application for browsing and viewing markdown-bas
 
 - **🔍 Smart Search** - Real-time search with `Ctrl/Cmd+F` shortcut
 - **⬅️ Navigation History** - Previous button with smart history tracking and `Alt/Option+←` shortcut
+- **🔝 Scroll to Top** - Floating button and keyboard shortcuts (`Page Up`/`Home`) for instant top navigation
 - **⌨️ Full Keyboard Navigation** - Arrow keys, shortcuts, and accessibility support
 - **🎯 Context Menus** - Right-click for additional actions
 - **📱 Touch-Optimized** - Mobile-friendly navigation with proper touch targets
@@ -155,6 +172,7 @@ neu build
 - **`Ctrl/Cmd + Shift + B`** - Collapse sidebar
 - **`Ctrl/Cmd + Q`** or **`Ctrl/Cmd + W`** - Quit the app
 - **`Esc`** - Clear search / Close dialogs
+- **`Page Up`** or **`Home`** - Scroll to top of current page
 
 ### 🖱️ **Mouse Navigation**
 
@@ -162,6 +180,7 @@ neu build
 - **Double Click** - Quick expand folder or open file
 - **Right Click** - Context menu with additional actions
 - **Hover** - Preview file info and quick actions
+- **Scroll Button Click** - Click the floating scroll-to-top button to return to page top
 
 ### ⌨️ **Keyboard Navigation**
 
@@ -279,6 +298,17 @@ The application comes with comprehensive tutorial collections:
 - **Google Sheets** - Spreadsheet automation and data manipulation
 - **Google Drive** - File management and organization
 - **YouTube API** - Video platform integration
+
+## 🆕 Recent Enhancements
+
+### Scroll-to-Top Feature (September 2025)
+
+- **🔝 Floating Button** - Elegant scroll-to-top button with smooth animations
+- **⌨️ Keyboard Shortcuts** - `Page Up` and `Home` key support for quick navigation
+- **🎨 Theme Integration** - Button styling matches light/dark themes
+- **📱 Mobile Responsive** - Optimized for touch devices with proper sizing
+- **⚡ Performance Optimized** - Throttled scroll detection for smooth performance
+- **♿ Accessible** - Full accessibility support with ARIA labels and keyboard navigation
 
 ## 🔧 Development
 

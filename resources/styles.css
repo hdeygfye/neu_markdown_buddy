@@ -1762,6 +1762,82 @@ body.theme-dark .home-stats .stat-label { color: #9ca3af; }
     background: #dc3545;
 }
 
+/* Scroll to Top Button */
+.scroll-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.8);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scroll-to-top:hover {
+    background: #2980b9;
+    transform: translateY(-2px) scale(1);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+}
+
+.scroll-to-top:active {
+    transform: translateY(0) scale(0.95);
+}
+
+.scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    animation: scrollButtonPulse 0.6s ease-out;
+}
+
+@keyframes scrollButtonPulse {
+    0% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+    }
+    100% {
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Dark theme styles for scroll to top button */
+body.theme-dark .scroll-to-top {
+    background: #4f46e5;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+}
+
+body.theme-dark .scroll-to-top:hover {
+    background: #4338ca;
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+}
+
+/* Mobile responsive adjustments for scroll to top button */
+@media (max-width: 768px) {
+    .scroll-to-top {
+        bottom: 20px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+    }
+}
+
 /* Mobile Menu Toggle */
 .mobile-menu-toggle {
     display: none;
