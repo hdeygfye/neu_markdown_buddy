@@ -766,7 +766,7 @@ class MarkdownBuddy {
                 results.push({
                     key,
                     item,
-                    fullPath,
+                    fullPath: (item.path || fullPath),
                     matchType: name.toLowerCase().includes(query) ? 'name' : 'path'
                 });
             }
@@ -937,17 +937,17 @@ class MarkdownBuddy {
     }
 
     getItemPath(item) {
-        // Walk up the DOM building a path from visible labels
+        // Prefer stored navigation key for reliability
+        if (item?.dataset?.navKey) return item.dataset.navKey;
+        // Fallback: Walk up the DOM building a path from visible labels
         let path = '';
         let current = item;
-
         while (current && (current.classList?.contains('nav-file') || current.classList?.contains('nav-folder'))) {
             const textEl = current.querySelector('.nav-file-text, .nav-folder-text');
             const label = textEl ? textEl.textContent.trim() : '';
             path = label + (path ? '/' + path : '');
             current = current.parentElement?.closest('.nav-folder');
         }
-
         return path;
     }
 
@@ -1184,7 +1184,9 @@ class MarkdownBuddy {
                     // Homebrew tutorials
                     { name: 'Docker', path: 'resources/tutorials/homebrew/development-tools/docker.md', displayPath: 'Homebrew › Docker', fullPath: 'resources/tutorials/homebrew/development-tools/docker.md' },
                     { name: 'Git', path: 'resources/tutorials/homebrew/development-tools/git.md', displayPath: 'Homebrew › Git', fullPath: 'resources/tutorials/homebrew/development-tools/git.md' },
-                    { name: 'Terminal', path: 'resources/tutorials/homebrew/system-guides/terminal.md', displayPath: 'Homebrew › Terminal', fullPath: 'resources/tutorials/homebrew/system-guides/terminal.md' }
+                    { name: 'Terminal', path: 'resources/tutorials/homebrew/system-guides/terminal.md', displayPath: 'Homebrew › Terminal', fullPath: 'resources/tutorials/homebrew/system-guides/terminal.md' },
+                    { name: 'V Programming Language', path: 'resources/tutorials/homebrew/programming-languages/vlang.md', displayPath: 'Homebrew › Programming Languages', fullPath: 'resources/tutorials/homebrew/programming-languages/vlang.md' },
+                    { name: 'Vlang', path: 'resources/tutorials/homebrew/programming-languages/vlang.md', displayPath: 'Homebrew › Programming Languages', fullPath: 'resources/tutorials/homebrew/programming-languages/vlang.md' }
                 ];
                 console.log('Added fallback tutorials:', allTutorials.length);
             }
@@ -1368,7 +1370,9 @@ class MarkdownBuddy {
                     // Homebrew tutorials
                     { name: 'Git', displayPath: 'Homebrew › Development Tools', fullPath: 'resources/tutorials/homebrew/development-tools/git.md' },
                     { name: 'Docker', displayPath: 'Homebrew › Development Tools', fullPath: 'resources/tutorials/homebrew/development-tools/docker.md' },
-                    { name: 'FFmpeg', displayPath: 'Homebrew › Development Tools', fullPath: 'resources/tutorials/homebrew/development-tools/ffmpeg.md' }
+                    { name: 'FFmpeg', displayPath: 'Homebrew › Development Tools', fullPath: 'resources/tutorials/homebrew/development-tools/ffmpeg.md' },
+                    { name: 'V Programming Language', displayPath: 'Homebrew › Programming Languages', fullPath: 'resources/tutorials/homebrew/programming-languages/vlang.md' },
+                    { name: 'Vlang', displayPath: 'Homebrew › Programming Languages', fullPath: 'resources/tutorials/homebrew/programming-languages/vlang.md' }
                 ];
                 console.log('Added real fallback tutorials:', allTutorials.length);
                 if (searchInput) {
@@ -1709,6 +1713,14 @@ class MarkdownBuddy {
                         name: 'README',
                         path: 'tutorials/homebrew/README.md'
                     },
+            'programming-languages': {
+                        type: 'folder',
+                        name: '💻 Programming Languages',
+                        children: {
+                'vlang.md': { type: 'file', name: 'V Language', path: 'resources/tutorials/homebrew/programming-languages/vlang.md' }
+                        },
+                        path: 'tutorials/homebrew/programming-languages'
+                    },
                     'cli-tools': {
                         type: 'folder',
                         name: '⚒️ CLI Tools',
@@ -1834,6 +1846,7 @@ class MarkdownBuddy {
             'security-tools': '🔒 Security Tools',
             'system-guides': '💻 System Guides',
             'programming-languages': '💻 Programming Languages',
+            'vlang': '⚡ V Programming Language',
             'Internet Protocols and Support': '🌐 Internet Protocols',
             'Data Compression and Archiving': '🗜️ Data Compression',
             'Generic Operating System Services': '⚙️ OS Services',
@@ -2143,6 +2156,8 @@ class MarkdownBuddy {
             div.setAttribute('role', 'button');
             div.setAttribute('aria-expanded', 'false');
             div.setAttribute('aria-label', `Folder: ${item.name}`);
+            // Store the navigation key path for reliable retrieval
+            div.dataset.navKey = key;
             
             // Improved indentation calculation for deep levels
             const baseIndent = 8;
@@ -2174,8 +2189,9 @@ class MarkdownBuddy {
             // Double-click to open folder view
             div.addEventListener('dblclick', (e) => {
                 e.stopPropagation();
-                const fullPath = item.path || key;
-                this.showFolderContents(fullPath, item.name);
+                // Use navigation key path so folder browsing relies on nav structure,
+                // not filesystem paths which may not resolve in fallback/browser mode.
+                this.showFolderContents(key, item.name);
             });
 
             // Create children container
@@ -2199,6 +2215,7 @@ class MarkdownBuddy {
             div.tabIndex = 0;
             div.setAttribute('role', 'button');
             div.setAttribute('aria-label', `File: ${item.name}`);
+            div.dataset.navKey = key;
             
             // Improved indentation calculation for deep levels
             const baseIndent = 8;
@@ -2463,12 +2480,13 @@ class MarkdownBuddy {
         }
         
         // Render files
-        if (files.length > 0) {
+    if (files.length > 0) {
             folderHtml += '<h3><i class="fas fa-file-alt"></i> Files</h3><div class="file-grid">';
             files.forEach(({key, item}) => {
-                const filePath = path ? `${path}/${key}` : key;
+        // Prefer the real filesystem path when available to ensure reliable loading
+        const filePath = item.path || (path ? `${path}/${key}` : key);
                 folderHtml += `
-                    <div class="file-card" onclick="markdownBuddy.loadTutorial('${filePath}', '${item.name}')">
+            <div class="file-card" onclick="markdownBuddy.loadTutorial('${filePath}', '${item.name.replace(/['"\\]/g, '')}')">
                         <i class="fas fa-file-markdown"></i>
                         <span>${item.name}</span>
                     </div>
@@ -2574,6 +2592,10 @@ class MarkdownBuddy {
                 console.error('Original path:', path);
                 console.error('Falling back to sample content');
                 markdownContent = this.getSampleMarkdown(path);
+            }
+            // Ensure we have some content to render
+            if (typeof markdownContent !== 'string' || markdownContent.trim() === '') {
+                markdownContent = `# Unable to load content\n\n- Path: ${path}\n- Note: File not found or empty. If you are running in browser/demo mode, ensure the path exists relative to resources/index.html.`;
             }
             
             // Create tutorial content structure
@@ -2684,10 +2706,14 @@ class MarkdownBuddy {
             const idx = files.findIndex(f => f.key === fileKey || f.item.path === path || f.item.path?.endsWith('/' + fileKey));
             if (idx === -1) return { prev: null, next: null };
 
-            const mk = (entry) => entry ? {
-                path: parentPath ? `${parentPath}/${entry.key}` : entry.key,
-                title: entry.item.name || entry.key.replace(/\.md$/, '')
-            } : null;
+            const mk = (entry) => {
+                if (!entry) return null;
+                const absPath = entry.item.path || (parentPath ? `${parentPath}/${entry.key}` : entry.key);
+                return {
+                    path: absPath,
+                    title: entry.item.name || entry.key.replace(/\.md$/, '')
+                };
+            };
 
             return {
                 prev: mk(files[idx - 1] || null),
